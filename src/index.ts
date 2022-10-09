@@ -1,5 +1,10 @@
+import * as dotEnv from 'dotenv';
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+
+dotEnv.config();
+
+const { ENV } = process.env;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -18,8 +23,12 @@ const createWindow = (): void => {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+  if (ENV === 'PRODUCTION') {
+    mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+    return;
+  }
 
+  mainWindow.loadURL('http://localhost:1133');
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 };
