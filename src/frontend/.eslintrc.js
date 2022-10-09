@@ -1,35 +1,36 @@
-{
-  "root": true,
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "jest": true
+export default {
+  root: true,
+  env: {
+    browser: true,
+    es2021: true,
+    jest: true
   },
-  "extends": [
+  extends: [
     "prettier",
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:sonarjs/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "overrides": [
+  overrides: [
   ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module",
-    "project": ["./tsconfig.json"],
-    "ecmaFeatures": {
-      "jsx": true
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    ecmaVersion: "latest",
+    sourceType: "module",
+    project: ["./tsconfig.json"],
+    tsconfigRootDir: __dirname,
+    ecmaFeatures: {
+      jsx: true
     }
   },
-  "plugins": [
+  plugins: [
     "react",
     "sonarjs",
     "unused-imports",
     "@typescript-eslint"
   ],
-  "rules": {
+  rules: {
     "semi": 0,
     "dot-notation": 0,
     "@typescript-eslint/semi": 0,
