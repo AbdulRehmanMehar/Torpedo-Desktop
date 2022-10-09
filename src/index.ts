@@ -4,7 +4,6 @@ import * as path from 'path';
 
 dotEnv.config();
 
-const { ENV } = process.env;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -23,7 +22,7 @@ const createWindow = (): void => {
   });
 
   // and load the index.html of the app.
-  if (ENV === 'PRODUCTION') {
+  if (app.isPackaged) {
     mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
     return;
   }
