@@ -1,6 +1,7 @@
 import * as dotEnv from 'dotenv';
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+import installExtension, { REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 dotEnv.config();
 
@@ -28,8 +29,15 @@ const createWindow = (): void => {
   }
 
   mainWindow.loadURL('http://localhost:1133');
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+
+  mainWindow.webContents.once("dom-ready", async () => {
+    await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log("An error occurred: ", err))
+      .finally(() => {
+          mainWindow.webContents.openDevTools();
+      });
+    });
 };
 
 // This method will be called when Electron has finished
