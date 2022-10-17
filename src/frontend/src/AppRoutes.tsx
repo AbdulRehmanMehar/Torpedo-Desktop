@@ -1,39 +1,61 @@
-import { Component, lazy, LazyExoticComponent, ReactNode, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from 'react-router-dom';
+import { Component, lazy, ReactNode, Suspense } from 'react';
+import {
+  DesktopOutlined,
+  UnorderedListOutlined,
+  PlusSquareOutlined
+} from '@ant-design/icons';
 
-const CreateInvoice = lazy(() => import('./pages/InvoiceManagement/CreateInvoice'));
+const InvoiceList = lazy(() => import('./pages/InvoiceManagement/Invoice'));
+const InvoiceForm = lazy(() => import('./pages/InvoiceManagement/InvoiceForm'));
 
-interface AppRoute {
-  key: string;
-  path: string;
-  component: LazyExoticComponent<typeof Component>;
-}
-
-export const routes: AppRoute[] = [
-  {
-    key: 'create-invoice',
-    path: '/',
-    component: CreateInvoice,
-  },
-]
+export const menu: Record<any, any> = {
+  InvoiceManagement: {
+    label: 'Invoice Management',
+    icon: <DesktopOutlined />,
+    children: [
+      {
+        key: 'list-invoices',
+        path: '/invoices',
+        label: 'Invoices',
+        icon: <UnorderedListOutlined />,
+        component: InvoiceList,
+      },
+      {
+        key: 'create-update-invoice',
+        path: '/',
+        label: 'Create Invoice',
+        icon: <PlusSquareOutlined />,
+        component: InvoiceForm,
+      },
+    ]
+  }
+};
 
 export default class ApplicationRouter extends Component<any, any> {
 
   render(): ReactNode {
+
     return (
-      <BrowserRouter>
-        <Suspense fallback={<>Loading...</>}>
-          <Routes>
-            {routes.map((route) => (
-              <Route
-                key={route.key}
-                path={route.path}
-                element={<route.component />}
-              />
-              ))}
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+      <Suspense fallback={<>Loading...</>}>
+        <Routes>
+          {Object.keys(menu).map((key: string) => {
+            const { children: routes } = menu[key];
+            
+            return routes.map((route: any) => {
+              if (route.component)
+                return (
+                  <Route
+                    key={route.key}
+                    path={route.path}
+                    element={<route.component />}
+                  />
+                );
+            });
+          })}
+
+        </Routes>
+      </Suspense>
     );
   }
 }
