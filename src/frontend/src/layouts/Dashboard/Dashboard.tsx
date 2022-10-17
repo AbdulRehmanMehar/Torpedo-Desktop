@@ -1,10 +1,12 @@
 import { menu } from '../../AppRoutes';
 import React, { Component } from 'react';
 import messages from '../../config/messages';
-import { Breadcrumb, Layout, Menu } from 'antd';
+import { Breadcrumb, Layout, Menu, Typography } from 'antd';
 import { NavigationProps } from '../../hoc/Navigation';
 
 const { Content, Footer, Sider } = Layout;
+import { HomeOutlined } from '@ant-design/icons';
+import { REACT_APP_NAME } from '../../config/constants';
 
 interface DashboardProps {
   navigationProps: NavigationProps;
@@ -32,9 +34,8 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
     const flattenRoutes = routerMenu.map(menuItem => menuItem.children).flat(Infinity);
     const { navigate, location } = navigationProps;
 
-    const currentPath = location.pathname;
-    const labelOfCurrentPath = flattenRoutes.find((route: any) => route.path === currentPath).label;
-    const labelOfParentSection = routerMenu.find(menuItem => JSON.stringify(menuItem.children).includes(currentPath)).label;
+    const currentPath = flattenRoutes.find((route: any) => route.path === location.pathname);
+    const parentSection = routerMenu.find(menuItem => JSON.stringify(menuItem.children).includes(location.pathname));
 
     return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -44,7 +45,13 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
         collapsed={isSidebarCollapsed} 
         onCollapse={isSidebarCollapsed => this.setState({ isSidebarCollapsed })}>
 
-          <div className="logo" />
+          <Typography.Title 
+            type='warning' 
+            level={4} 
+            style={{ margin: '25px' }}>
+            { REACT_APP_NAME }
+          </Typography.Title>
+
           <Menu 
             theme="dark" 
             mode="inline" 
@@ -61,8 +68,15 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
       <Layout className="site-layout">
         <Content style={{ margin: '0 16px' }}>
           <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item>{labelOfParentSection}</Breadcrumb.Item>
-            <Breadcrumb.Item>{labelOfCurrentPath}</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <HomeOutlined /> { REACT_APP_NAME }
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              { parentSection.icon } { parentSection.label }
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              { currentPath.icon } { currentPath.label }
+            </Breadcrumb.Item>
           </Breadcrumb>
           { children }
         </Content>
