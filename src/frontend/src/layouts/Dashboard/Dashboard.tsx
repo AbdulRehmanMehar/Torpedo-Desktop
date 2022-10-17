@@ -1,13 +1,13 @@
-import React, { Component, Suspense } from 'react';
-import { Breadcrumb, Layout, Menu } from 'antd';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { menu } from '../../AppRoutes';
+import React, { Component } from 'react';
 import messages from '../../config/messages';
+import { Breadcrumb, Layout, Menu } from 'antd';
+import { NavigationProps } from '../../hoc/Navigation';
 
 const { Content, Footer, Sider } = Layout;
 
 interface DashboardProps {
-  navigationProps: any;
+  navigationProps: NavigationProps;
   children: JSX.Element|JSX.Element[];
 }
 
@@ -30,8 +30,11 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
     const { isSidebarCollapsed } = this.state;
     const routerMenu = Object.keys(menu).map(key => menu[key]);
     const flattenRoutes = routerMenu.map(menuItem => menuItem.children).flat(Infinity);
-    const { navigate } = navigationProps;
+    const { navigate, location } = navigationProps;
 
+    const currentPath = location.pathname;
+    const labelOfCurrentPath = flattenRoutes.find((route: any) => route.path === currentPath).label;
+    const labelOfParentSection = routerMenu.find(menuItem => JSON.stringify(menuItem.children).includes(currentPath)).label;
 
     return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -58,8 +61,8 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
       <Layout className="site-layout">
         <Content style={{ margin: '0 16px' }}>
           <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item>User</Breadcrumb.Item>
-            <Breadcrumb.Item>Bill</Breadcrumb.Item>
+            <Breadcrumb.Item>{labelOfParentSection}</Breadcrumb.Item>
+            <Breadcrumb.Item>{labelOfCurrentPath}</Breadcrumb.Item>
           </Breadcrumb>
           { children }
         </Content>

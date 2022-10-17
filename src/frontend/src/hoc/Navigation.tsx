@@ -1,5 +1,12 @@
 import React from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, NavigateFunction } from 'react-router-dom';
+
+export interface NavigationProps {
+  navigate: NavigateFunction;
+  location: Location;
+  searchParams: URLSearchParams;
+  setSearchParams: Function;
+}
 
 export default function withNavigation(Component: React.ComponentType<any>) {
   const displayName = Component.displayName || Component.name || 'Component';
