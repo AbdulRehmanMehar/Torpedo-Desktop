@@ -6,8 +6,8 @@ import {
   PlusSquareOutlined
 } from '@ant-design/icons';
 
-const InvoiceList = lazy(() => import('./pages/InvoiceManagement/Invoice'));
-const InvoiceForm = lazy(() => import('./pages/InvoiceManagement/InvoiceForm'));
+const InvoiceList = lazy(() => import('./pages/InvoiceManagement/Components/Invoice'));
+const InvoiceForm = lazy(() => import('./pages/InvoiceManagement/Components/InvoiceForm'));
 
 export const menu: Record<any, any> = {
   InvoiceManagement: {

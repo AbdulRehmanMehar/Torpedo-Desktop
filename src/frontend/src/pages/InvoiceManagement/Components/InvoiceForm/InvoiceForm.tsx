@@ -1,6 +1,6 @@
 import { AutoComplete, Input, Layout } from "antd";
 import { Component, ReactNode } from "react";
-import { NavigationProps } from "../../../hoc/Navigation";
+import { NavigationProps } from "../../../../hoc/Navigation";
 
 const mockVal = (str: string, repeat = 1) => ({
   value: str.repeat(repeat),
