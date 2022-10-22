@@ -16,14 +16,14 @@ export const menu: Record<any, any> = {
     children: [
       {
         key: 'list-invoices',
-        path: '/invoices',
+        path: '/',
         label: 'Invoices',
         icon: <UnorderedListOutlined />,
         component: InvoiceList,
       },
       {
         key: 'create-update-invoice',
-        path: '/',
+        path: '/create-invoices',
         label: 'Create Invoice',
         icon: <PlusSquareOutlined />,
         component: InvoiceForm,
