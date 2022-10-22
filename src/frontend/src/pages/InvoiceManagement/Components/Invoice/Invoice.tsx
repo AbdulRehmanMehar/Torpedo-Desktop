@@ -90,6 +90,7 @@ export default class Invoice extends Component<InvoiceProps, InvoiceState> {
         <Table 
           loading={isLoading} 
           columns={columns} 
+          pagination={false}
           dataSource={invoices.map(
             ({ id, customerName, customerPhone, productName, productPrice, productMeasurements, productQuantity, payments, netPayable }, index) => ({
               key: id,
