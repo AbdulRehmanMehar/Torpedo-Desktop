@@ -37,7 +37,7 @@ interface InvoiceFormProps {
 
 interface InvoiceFormState {
   options: any[];
-  formInputs: Record<any, string>;
+  formInputs: Record<any, any>;
   suggestions: Record<any, any[]>;
 }
 
@@ -231,6 +231,14 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
     if (Object.keys(formInputs).length < 7) return toast('Please add payment information'); 
 
+    const netPayable = (formInputs.productQuantity || 0) * (formInputs.productPrice || 0);
+    const { payments } = formInputs;
+    const paymentAmounts = payments.map((payment: any) => payment.amount);
+    const netPaid = paymentAmounts.reduce((last: number, current:number) => last+current, 0);
+
+    if (netPaid !== netPayable) return toast(`Net Payable amount is ${netPayable} but Total Paid is ${netPaid}. Please fix it.`);
+
+
     addInvoice({
       data: {...formInputs},
       onSuccess: () => {
@@ -287,6 +295,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                     ref={currentRef}
                     autoFocus={index === 0}
                     value={value} 
+                    type={(key === 'productQuantity' || key === 'productPrice') ? 'number' : 'text'}
                     placeholder={placeholder}
                     
                     onKeyUp={(event: any) => {
