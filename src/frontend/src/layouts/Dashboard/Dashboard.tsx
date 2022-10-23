@@ -3,10 +3,13 @@ import React, { Component } from 'react';
 import messages from '../../config/messages';
 import { Breadcrumb, Layout, Menu, Typography } from 'antd';
 import { NavigationProps } from '../../hoc/Navigation';
-
-const { Content, Footer, Sider } = Layout;
 import { HomeOutlined } from '@ant-design/icons';
 import { REACT_APP_NAME } from '../../config/constants';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
+
+const { Content, Footer, Sider } = Layout;
 
 interface DashboardProps {
   navigationProps: NavigationProps;
@@ -45,12 +48,14 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
         collapsed={isSidebarCollapsed} 
         onCollapse={isSidebarCollapsed => this.setState({ isSidebarCollapsed })}>
 
-          <Typography.Title 
-            type='warning' 
-            level={4} 
-            style={{ margin: '25px' }}>
-            { REACT_APP_NAME }
-          </Typography.Title>
+          {!isSidebarCollapsed && 
+            <Typography.Title 
+              type='warning' 
+              level={4} 
+              style={{ margin: '25px' }}>
+              { REACT_APP_NAME }
+            </Typography.Title>
+          }
 
           <Menu 
             theme="dark" 
@@ -79,6 +84,7 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
             </Breadcrumb.Item>
           </Breadcrumb>
           { children }
+          <ToastContainer />
         </Content>
         <Footer style={{ textAlign: 'center' }}>{messages.FOOTER}</Footer>
       </Layout>

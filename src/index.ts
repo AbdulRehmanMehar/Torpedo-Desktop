@@ -24,7 +24,10 @@ const createWindow = (): void => {
 
   // and load the index.html of the app.
   if (app.isPackaged) {
-    mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+    const pathOfBuild = path.join(__dirname, './build/index.html');
+    console.log(pathOfBuild, '.............................................');
+    
+    mainWindow.loadFile(pathOfBuild);
     return;
   }
 
