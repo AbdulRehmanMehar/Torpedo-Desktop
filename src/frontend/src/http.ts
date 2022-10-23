@@ -3,9 +3,9 @@ import axios, { AxiosInterceptorOptions, AxiosRequestConfig, AxiosResponse } fro
 const { REACT_APP_BASE_URL: baseURL } = process.env;
 
 const instance = axios.create({
-  // baseURL,
+  baseURL,
   // timeout: 5000,
-  baseURL: 'http://localhost:1337',
+  // baseURL: 'http://localhost:1337',
 });
 
 export const HttpClient = instance;

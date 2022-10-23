@@ -5,7 +5,7 @@ import { ActionTypes } from "./types";
 
 export const getInvoices = (args: ActionArgs) => async (dispatch: Dispatch) => {
 
-  const { data, onSuccess, onComplete, onError } = args;
+  const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
     const { invoices } = await getInvoiceList();
@@ -29,7 +29,7 @@ export const getInvoices = (args: ActionArgs) => async (dispatch: Dispatch) => {
 };
 
 export const addInvoice = (args: ActionArgs) =>async (dispatch: Dispatch) => {
-  const { data, onSuccess, onComplete, onError } = args;
+  const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
     const { invoice } = await createInvoice(data);

@@ -1,6 +1,8 @@
 import { Component, ReactNode } from "react";
-import { Layout, Table } from 'antd';
+import { Layout, Table, Typography } from 'antd';
 import { Invoice as InvoiceType } from "../../Helpers/types";
+
+const { Title } = Typography;
 
 interface InvoiceProps {
   invoices: InvoiceType[];
@@ -87,6 +89,7 @@ export default class Invoice extends Component<InvoiceProps, InvoiceState> {
 
     return (
       <Layout style={{ minWidth: '100%', overflowX: 'auto' }}>
+        <Title level={2}>View Invoices</Title>
         <Table 
           loading={isLoading} 
           columns={columns} 
@@ -102,7 +105,7 @@ export default class Invoice extends Component<InvoiceProps, InvoiceState> {
               productMeasurements,
               productQuantity,
               netPayable,
-              payments: payments.map(({ paymentType, amount }) => `${amount} as ${paymentType}`).join(',')
+              payments: payments.map(({ paymentType, amount }) => `${amount} as ${paymentType}`).join(', ')
             })
           )} />
       </Layout>
