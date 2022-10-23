@@ -48,12 +48,14 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
         collapsed={isSidebarCollapsed} 
         onCollapse={isSidebarCollapsed => this.setState({ isSidebarCollapsed })}>
 
-          <Typography.Title 
-            type='warning' 
-            level={4} 
-            style={{ margin: '25px' }}>
-            { REACT_APP_NAME }
-          </Typography.Title>
+          {!isSidebarCollapsed && 
+            <Typography.Title 
+              type='warning' 
+              level={4} 
+              style={{ margin: '25px' }}>
+              { REACT_APP_NAME }
+            </Typography.Title>
+          }
 
           <Menu 
             theme="dark" 
