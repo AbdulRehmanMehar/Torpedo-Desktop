@@ -234,7 +234,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     const netPayable = (formInputs.productQuantity || 0) * (formInputs.productPrice || 0);
     const { payments } = formInputs;
     const paymentAmounts = payments.map((payment: any) => payment.amount);
-    const netPaid = paymentAmounts.reduce((last: number, current:number) => last+current, 0);
+    const netPaid = paymentAmounts.reduce((last: number, current:number) => last + parseInt('' + current), 0);
 
     if (netPaid !== netPayable) return toast(`Net Payable amount is ${netPayable} but Total Paid is ${netPaid}. Please fix it.`);
 
