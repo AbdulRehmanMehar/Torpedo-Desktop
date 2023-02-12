@@ -1,8 +1,8 @@
 {
-  "name": "bajwa-tiles",
-  "productName": "bajwa-tiles",
+  "name": "torpedo",
+  "productName": "torpedo",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Management Solution, focused on Tiles Industry",
   "main": "dist/index.js",
   "scripts": {
     "preinstall": "npm i -g yarn",
