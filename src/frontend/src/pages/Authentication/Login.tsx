@@ -27,10 +27,6 @@ class Login extends Component<LoginProps, any> {
     return (
       <Row justify='center' align='middle' style={{ height: '100vh' }}>
         <Col>
-          <Paragraph style={{ margin: '2em 0' }}>
-            <Title level={3} style={{ margin: 0 }}>Torpedo!</Title>
-            <Text>Enter your credentials</Text>
-          </Paragraph>
     
           <Form
             name="login"
@@ -41,6 +37,14 @@ class Login extends Component<LoginProps, any> {
             onFinish={(values) => this.onSubmit(values)}
             autoComplete="off"
           >
+            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+
+              <Paragraph style={{ margin: '.8em 0' }}>
+                <Title level={3} style={{ margin: 0 }}>Torpedo!</Title>
+                <Text>Enter your credentials</Text>
+              </Paragraph>
+            </Form.Item>
+
             <Form.Item
               label="Email"
               name="email"
