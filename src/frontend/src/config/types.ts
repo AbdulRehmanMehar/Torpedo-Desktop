@@ -35,3 +35,11 @@ export type ActionArgs = {
   onComplete: () => void;
 }
 
+export interface AuthenticationCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthenticationResponse {
+  token: string;
+}

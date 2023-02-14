@@ -1,20 +1,23 @@
 import { Component } from "react";
 import { Provider } from "react-redux";
+import { connect } from "react-redux";
+import { RootState } from "./store";
 import { HashRouter } from "react-router-dom";
-import AppRoutes from "./AppRoutes";
-import Dashboard from "./layouts/Dashboard";
 import store from "./store";
+import Bootstrap from "./Bootstrap";
 
 export default class App extends Component<any, any> {
   render() {
+
+    const { token } = this.props;
+
     return (
       <HashRouter>
         <Provider store={store}>
-          <Dashboard>
-            <AppRoutes />
-          </Dashboard>
+          <Bootstrap />
         </Provider>
       </HashRouter>
     )
   }
 }
+
