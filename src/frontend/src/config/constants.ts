@@ -1,5 +1,6 @@
-const { REACT_APP_NAME } = process.env;
+const { REACT_APP_NAME, REACT_APP_VERSION } = process.env;
 
 export {
   REACT_APP_NAME,
+  REACT_APP_VERSION
 }
