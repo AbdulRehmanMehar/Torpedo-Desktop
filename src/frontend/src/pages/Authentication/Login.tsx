@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { Button, Checkbox, Col, Form, Input, Row } from 'antd';
+import { Alert, Button, Checkbox, Col, Form, Input, Row } from 'antd';
 import { Typography } from 'antd';
 import { connect } from 'react-redux';
 import { login } from './Store/Actions';
+import { Spin } from 'antd';
+import { toast } from 'react-toastify';
+
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -10,20 +13,31 @@ interface LoginProps {
   login: Function;
 }
 
-class Login extends Component<LoginProps, any> {
+class Login extends Component<LoginProps, { isProcessing: boolean }> {
+
+  constructor(props: LoginProps) {
+    super(props);
+
+    this.state = {
+      isProcessing: false,
+    }
+  }
 
   onSubmit(values: any) {
     console.log(this.props);
     
     const { login } = this.props;
+    this.setState({ isProcessing: true });
     login({
       data: values,
-      onSuccess: () => console.log('success'),
-      onError: () => console.error('error')
+      onError: (message: string) => toast.error(message),
+      onComplete: () => this.setState({ isProcessing: false }),
     });
   }
 
   render() {
+    const { isProcessing } = this.state;
+
     return (
       <Row justify='center' align='middle' style={{ height: '100vh' }}>
         <Col>
@@ -65,8 +79,8 @@ class Login extends Component<LoginProps, any> {
             </Form.Item>
     
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <Button type="primary" htmlType="submit">
-                Login
+              <Button type={ isProcessing ? 'default' : 'primary' } htmlType="submit">
+                { isProcessing ? <Spin /> : 'Login' }
               </Button>
             </Form.Item>
           </Form>

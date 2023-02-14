@@ -17,9 +17,10 @@ export const login = (args: ActionArgs) =>async (dispatch: Dispatch) => {
     });
 
     onSuccess && onSuccess();
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
-    onError && onError(error);
+    const message = error.response.data.error_description;
+    onError && onError(message);
   } finally {
     onComplete && onComplete();
   }

@@ -84,7 +84,6 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
             </Breadcrumb.Item>
           </Breadcrumb>
           { children }
-          <ToastContainer />
         </Content>
         <Footer style={{ textAlign: 'center' }}>{messages.FOOTER}</Footer>
       </Layout>

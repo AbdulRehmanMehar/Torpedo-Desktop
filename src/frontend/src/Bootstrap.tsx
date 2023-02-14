@@ -4,6 +4,7 @@ import Dashboard from "./layouts/Dashboard";
 import store, { RootState } from "./store";
 import Login from "./pages/Authentication/Login";
 import { connect } from "react-redux";
+import { ToastContainer } from "react-toastify";
 
 
 class Bootstrap extends Component<{ token: string }, any> {
@@ -18,6 +19,7 @@ class Bootstrap extends Component<{ token: string }, any> {
                         </Dashboard>
                     ): <Login />
                 }
+                <ToastContainer />
           </>
         );
     }
