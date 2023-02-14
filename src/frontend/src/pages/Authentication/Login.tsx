@@ -39,7 +39,7 @@ class Login extends Component<LoginProps, any> {
           >
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
 
-              <Paragraph style={{ margin: '.8em 0' }}>
+              <Paragraph style={{ margin: '.3em 0' }}>
                 <Title level={3} style={{ margin: 0 }}>Torpedo!</Title>
                 <Text>Enter your credentials</Text>
               </Paragraph>
