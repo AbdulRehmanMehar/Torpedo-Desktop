@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { login } from './Store/Actions';
 import { Spin } from 'antd';
 import { toast } from 'react-toastify';
+import messages from '../../config/messages';
 
 
 const { Text, Title, Paragraph } = Typography;
@@ -85,6 +86,14 @@ class Login extends Component<LoginProps, { isProcessing: boolean }> {
             </Form.Item>
           </Form>
         </Col>
+
+        <Paragraph style={{
+          position: 'absolute',
+          bottom: '0',
+        }}>
+          {messages.FOOTER} Developed by <b><a href='https://abdurehman.com'>Abdul Rehman</a></b>.
+        </Paragraph>
+
       </Row>
     );
     

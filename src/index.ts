@@ -1,5 +1,5 @@
 import * as dotEnv from 'dotenv';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import * as path from 'path';
 import installExtension, { REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
@@ -41,6 +41,11 @@ const createWindow = (): void => {
           mainWindow.webContents.openDevTools();
       });
     });
+
+  mainWindow.webContents.on('will-navigate', function (e, url) {
+    e.preventDefault();
+    shell.openExternal(url);
+  });
 };
 
 // This method will be called when Electron has finished
