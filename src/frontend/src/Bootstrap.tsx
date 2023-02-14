@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 
 
-class Bootstrap extends Component<{ token: string }, any> {
+class Bootstrap extends Component<{ token: string | undefined }, any> {
     render() {
         const { token } = this.props;
         return (

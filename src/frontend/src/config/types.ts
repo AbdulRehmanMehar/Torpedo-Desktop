@@ -40,6 +40,17 @@ export interface AuthenticationCredentials {
   password: string;
 }
 
+export type AuthenticatedUser = {
+  name: string;
+  email: string;
+};
+
+export type AuthenticatedTenant = {
+  name: string;
+};
+
 export interface AuthenticationResponse {
   token: string;
+  user: AuthenticatedUser;
+  tenant: AuthenticatedTenant;
 }
