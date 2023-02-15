@@ -90,8 +90,11 @@ class Login extends Component<LoginProps, { isProcessing: boolean }> {
         <Paragraph style={{
           position: 'absolute',
           bottom: '0',
+          marginLeft: '50px'
         }}>
-          {messages.FOOTER} Developed by <b><a href='https://abdurehman.com'>Abdul Rehman</a></b>.
+          
+            {messages.FOOTER} Developed by <b><a href='https://abdurehman.com'>Abdul Rehman</a></b>.
+          
         </Paragraph>
 
       </Row>

@@ -2,6 +2,7 @@ import { AuthenticationResponse } from "../../../../config/types";
 
 export enum ActionTypes {
   LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
 }
 
 interface AttemptLogin {
@@ -9,4 +10,8 @@ interface AttemptLogin {
   payload: AuthenticationResponse;
 }
 
-export type Action = AttemptLogin;
+interface AttemptLogout {
+  type: ActionTypes.LOGOUT;
+}
+
+export type Action = AttemptLogin | AttemptLogout;

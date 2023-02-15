@@ -25,3 +25,7 @@ export const getLocalStorageWithExpiry = (key: string) => {
     
 	return item.value
 }
+
+export const removeLocalStorage = (key: string) => {
+	localStorage.removeItem(key)
+}

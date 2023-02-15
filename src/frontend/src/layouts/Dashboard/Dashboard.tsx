@@ -6,13 +6,16 @@ import { NavigationProps } from '../../hoc/Navigation';
 import { HomeOutlined } from '@ant-design/icons';
 import { REACT_APP_NAME } from '../../config/constants';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
+import { AuthenticationStore } from '../../pages/Authentication/Store/Reducers';
+import { toast } from 'react-toastify';
 
 
 const { Content, Footer, Sider } = Layout;
 
 interface DashboardProps {
   navigationProps: NavigationProps;
+  authentication: AuthenticationStore;
+  logout: Function;
   children: JSX.Element|JSX.Element[];
 }
 
@@ -31,8 +34,8 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
   }
 
   render(): React.ReactNode {
-    const { children, navigationProps } = this.props;
     const { isSidebarCollapsed } = this.state;
+    const { children, navigationProps, authentication, logout } = this.props;
     const routerMenu = Object.keys(menu).map(key => menu[key]);
     const flattenRoutes = routerMenu.map(menuItem => menuItem.children).flat(Infinity);
     const { navigate, location } = navigationProps;
@@ -49,12 +52,31 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
         onCollapse={isSidebarCollapsed => this.setState({ isSidebarCollapsed })}>
 
           {!isSidebarCollapsed && 
-            <Typography.Title 
-              type='warning' 
-              level={4} 
-              style={{ margin: '25px' }}>
-              { REACT_APP_NAME }
-            </Typography.Title>
+          <div style={{ margin: '25px' }}>
+              
+              <Typography.Title 
+                type='warning' 
+                level={2} style={{margin: '0px', padding: '0px', marginBottom: '20px', position: 'relative'}}>
+                { REACT_APP_NAME }
+                <Typography.Text 
+                  style={{color: '#ccc', fontWeight: 'lighter', fontSize: '12px', position: 'absolute', left: '100px', }}>
+                    <b>{ authentication.tenant?.name } </b>
+                </Typography.Text>
+              </Typography.Title>
+              <Typography.Text style={{ color: '#ccc', fontSize: '12px' }}>
+                { authentication.user?.name } -&nbsp;
+                <a href='#' onClick={(event) => {
+                  event.preventDefault();
+                  logout();
+                  toast.info('Logged out successfully!');
+                  navigate('/');
+                }}>Logout</a>
+              </Typography.Text><br />
+              <Typography.Text style={{ color: '#ccc', fontSize: '12px' }}>
+                { authentication.user?.email }
+              </Typography.Text>
+              
+            </div>
           }
 
           <Menu 

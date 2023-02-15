@@ -1,4 +1,4 @@
-import { getLocalStorageWithExpiry, setLocalStorageWithExpiry } from "../../../../config/localstorage";
+import { getLocalStorageWithExpiry, removeLocalStorage, setLocalStorageWithExpiry } from "../../../../config/localstorage";
 import { AuthenticatedTenant, AuthenticatedUser, Invoice } from "../../../../config/types";
 import { Action, ActionTypes } from "../Actions/types";
 
@@ -7,6 +7,8 @@ interface State {
   user: AuthenticatedUser | undefined;
   tenant: AuthenticatedTenant | undefined;
 }
+
+export type AuthenticationStore = State;
 
 const initalState: State = {
   token: undefined,
@@ -24,6 +26,10 @@ const authenticationReducer = (state = initalState, action: Action) => {
         ...state,
         ...action.payload
       };
+    
+    case ActionTypes.LOGOUT:
+      removeLocalStorage('auth');
+      return initalState;
     
     default: 
       return state;

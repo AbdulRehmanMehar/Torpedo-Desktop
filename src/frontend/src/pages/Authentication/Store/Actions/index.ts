@@ -25,3 +25,9 @@ export const login = (args: ActionArgs) =>async (dispatch: Dispatch) => {
     onComplete && onComplete();
   }
 }
+
+export const logout = (args: ActionArgs) =>async (dispatch: Dispatch) => {
+  dispatch({
+    type: ActionTypes.LOGOUT
+  });
+}
