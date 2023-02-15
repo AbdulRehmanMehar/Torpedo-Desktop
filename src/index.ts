@@ -34,11 +34,11 @@ const createWindow = (): void => {
   mainWindow.loadURL('http://localhost:1133');
 
   mainWindow.webContents.once("dom-ready", async () => {
+    mainWindow.webContents.openDevTools();
     await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
       .then((name) => console.log(`Added Extension:  ${name}`))
       .catch((err) => console.log("An error occurred: ", err))
       .finally(() => {
-          mainWindow.webContents.openDevTools();
       });
     });
 

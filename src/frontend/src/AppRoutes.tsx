@@ -3,13 +3,35 @@ import { Component, lazy, ReactNode, Suspense } from 'react';
 import {
   DesktopOutlined,
   UnorderedListOutlined,
-  PlusSquareOutlined
+  PlusSquareOutlined,
+  DeploymentUnitOutlined
 } from '@ant-design/icons';
 
 const InvoiceList = lazy(() => import('./pages/InvoiceManagement/Components/Invoice'));
 const InvoiceForm = lazy(() => import('./pages/InvoiceManagement/Components/InvoiceForm'));
+const ProductForm = lazy(() => import('./pages/ProductManagement/Components/ProductForm'));
 
 export const menu: Record<any, any> = {
+  ProductManagement: {
+    label: 'Product Management',
+    icon: <DeploymentUnitOutlined />,
+    children: [
+      {
+        key: 'list-products',
+        path: '/',
+        label: 'Products',
+        icon: <UnorderedListOutlined />,
+        component: InvoiceList,
+      },
+      {
+        key: 'create-update-product',
+        path: '/create-product',
+        label: 'Create Product',
+        icon: <PlusSquareOutlined />,
+        component: ProductForm,
+      },
+    ]
+  },
   InvoiceManagement: {
     label: 'Invoice Management',
     icon: <DesktopOutlined />,

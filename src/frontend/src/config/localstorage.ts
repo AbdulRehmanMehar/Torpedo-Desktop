@@ -5,7 +5,7 @@ export const setLocalStorageWithExpiry = (key: string, value: any, ttl: number) 
 	// as well as the time when it's supposed to expire
 	const item = {
 		value: value,
-		expiry: now.getTime() + ttl,
+		expiry: now.getTime() + (ttl * 1000),
 	}
 	localStorage.setItem(key, JSON.stringify(item))
 }
