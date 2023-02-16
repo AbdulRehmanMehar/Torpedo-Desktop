@@ -314,11 +314,9 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     const formFields = this.getFormFields();
     const isSubmitDisabled = Object.keys(formFields).filter(key => !formFields[key].optional).map(key => !!this.state.formInputs[key]).includes(false);    
     
-    
-
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
-        <Title level={2}>Create a Product</Title>
+        <Title level={2} style={{ margin: '25px' }}>Add Product</Title>
         <Form {...formItemLayout} initialValues={{
           height: formInputs['height'],
           width: formInputs['width'],
