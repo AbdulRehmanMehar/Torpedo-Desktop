@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons';
 import ReactDOM from "react-dom";
 import { ProductResponse } from "../../../../config/types";
+import { formatCurrency } from "../../../../config/utils";
 
 
 const { Item } = Form;
@@ -133,10 +134,6 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     document.removeEventListener('keyup', this.listenForKeyPress);
   }
 
-  formatCurrency = (number: number) => {
-    return new Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 }).format(number);
-  }
-
   getFormFields = (): Record<any, FormFields & { readOnly?: boolean, type?: 'select' | 'number' | 'text', optional?: boolean, rules?: any[] }> => {
     const { formInputs } = this.state;
     return {
@@ -171,7 +168,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
           label: 'Total Price',
           suggestions: [],
           type: 'number',
-          value: `${this.formatCurrency((parseInt(this.state.formInputs.price) * parseInt(this.state.formInputs.quantity)))} PKR`,
+          value: `${formatCurrency((parseInt(this.state.formInputs.price) * parseInt(this.state.formInputs.quantity)))} PKR`,
           optional: true,
           rules: [],
           readOnly: true,

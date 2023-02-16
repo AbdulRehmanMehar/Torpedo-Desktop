@@ -9,6 +9,8 @@ import {
 
 const InvoiceList = lazy(() => import('./pages/InvoiceManagement/Components/Invoice'));
 const InvoiceForm = lazy(() => import('./pages/InvoiceManagement/Components/InvoiceForm'));
+
+const ProductList = lazy(() => import('./pages/ProductManagement/Components/Products'));
 const ProductForm = lazy(() => import('./pages/ProductManagement/Components/ProductForm'));
 
 export const menu: Record<any, any> = {
@@ -21,7 +23,7 @@ export const menu: Record<any, any> = {
         path: '/list-products',
         label: 'Products',
         icon: <UnorderedListOutlined />,
-        component: InvoiceList,
+        component: ProductList,
       },
       {
         key: 'create-update-product',
