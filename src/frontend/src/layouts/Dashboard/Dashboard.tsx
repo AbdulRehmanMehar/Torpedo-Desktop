@@ -3,11 +3,14 @@ import React, { Component } from 'react';
 import messages from '../../config/messages';
 import { Breadcrumb, Layout, Menu, Typography } from 'antd';
 import { NavigationProps } from '../../hoc/Navigation';
-import { HomeOutlined } from '@ant-design/icons';
+import { EditOutlined, HomeOutlined } from '@ant-design/icons';
 import { REACT_APP_NAME } from '../../config/constants';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthenticationStore } from '../../pages/Authentication/Store/Reducers';
 import { toast } from 'react-toastify';
+import { validate as uuidValidate } from 'uuid';
+import {parse, stringify as JsonStringify, toJSON, fromJSON} from 'flatted';
+
 
 
 const { Content, Footer, Sider } = Layout;
@@ -40,8 +43,37 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
     const flattenRoutes = routerMenu.map(menuItem => menuItem.children).flat(Infinity);
     const { navigate, location } = navigationProps;
 
-    const currentPath = flattenRoutes.find((route: any) => route.path === location.pathname);
-    const parentSection = routerMenu.find(menuItem => JSON.stringify(menuItem.children).includes(location.pathname));
+    const currentPath = flattenRoutes.find((route: any) => {
+      let comparable1 = route.path;
+      let comparable2 = location.pathname;
+      if (route.path.includes(':')) {
+        const array1 = comparable1.split('/');
+        const array2 = comparable2.split('/');
+        array1.pop();
+        array2.pop();
+        comparable1 = array1.join('');
+        comparable2 = array2.join('');
+      }
+      
+      if (comparable1 === comparable2) {
+        route.label = route.label.replace('Create', 'Update');
+        route.icon = <EditOutlined />;
+        return true;
+      }
+      return false;
+    });
+    const parentSection = routerMenu.find(menuItem => {
+      const childs = JsonStringify(menuItem.children);
+      let compareable = location.pathname;
+      const arrayOfPathChunks = location.pathname.split('/');
+      const lastElement = (arrayOfPathChunks.pop() || '').substring(1) || '';
+      
+      if (uuidValidate(lastElement)) {
+        compareable = arrayOfPathChunks.join('');
+      }
+
+      return childs.includes(compareable)
+    });
 
     return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -98,12 +130,16 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
             <Breadcrumb.Item>
               <HomeOutlined /> { REACT_APP_NAME }
             </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              { parentSection.icon } { parentSection.label }
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              { currentPath.icon } { currentPath.label }
-            </Breadcrumb.Item>
+            {parentSection &&  (
+              <Breadcrumb.Item>
+                { parentSection.icon } { parentSection.label }
+              </Breadcrumb.Item>
+            )}
+            {currentPath && (
+              <Breadcrumb.Item>
+                { currentPath.icon } { currentPath.label }
+              </Breadcrumb.Item>
+            )}
           </Breadcrumb>
           { children }
         </Content>

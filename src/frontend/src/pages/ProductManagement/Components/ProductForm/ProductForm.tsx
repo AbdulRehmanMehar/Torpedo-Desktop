@@ -10,6 +10,7 @@ import {
 import ReactDOM from "react-dom";
 import { ProductResponse } from "../../../../config/types";
 import { formatCurrency } from "../../../../config/utils";
+import path from "path";
 
 
 const { Item } = Form;
@@ -39,6 +40,7 @@ interface ProductFormState {
   options: any[];
   formInputs: Record<any, any>;
   suggestions: Record<any, any[]>;
+  formType?: 'Update';
 }
 
 const formItemLayout = {
@@ -67,6 +69,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         quality: this.defaultQualityForProduct,
       },
       suggestions: {},
+      formType: undefined,
     };
 
     this.numberOfFormFields = Object.keys(this.getFormFields()).length;
@@ -79,7 +82,14 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   }
 
   componentDidMount(): void {
-    const { getAllProducts } = this.props;
+    const { getAllProducts, navigationProps } = this.props;
+    const { pathParams } = navigationProps;
+    const { productId } = pathParams;
+    
+    if (productId !== ":productId") {
+      this.setState({ formType: 'Update' });
+    }
+    
     getAllProducts();
 
     document.addEventListener('keyup', this.listenForKeyPress);
@@ -293,13 +303,13 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
-    const { formInputs, suggestions } = this.state;
+    const { formInputs, suggestions, formType } = this.state;
     const formFields = this.getFormFields();
     const isSubmitDisabled = Object.keys(formFields).filter(key => !formFields[key].optional).map(key => !!this.state.formInputs[key]).includes(false);    
     
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
-        <Title level={2} style={{ margin: '25px' }}>Add Product</Title>
+        <Title level={2} style={{ margin: '25px' }}>{formType || 'Add'} Product</Title>
         <Form {...formItemLayout} initialValues={{
           height: formInputs['height'],
           width: formInputs['width'],

@@ -27,7 +27,8 @@ export const menu: Record<any, any> = {
       },
       {
         key: 'create-update-product',
-        path: '/create-product',
+        path: '/create-update-product/:productId',
+        // defaultPath: '/create-update-product',
         label: 'Create Product',
         icon: <PlusSquareOutlined />,
         component: ProductForm,

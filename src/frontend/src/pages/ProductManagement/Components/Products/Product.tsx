@@ -6,12 +6,14 @@ import { ColumnGroupType, ColumnsType, ColumnType, DataIndex } from "rc-table/li
 import { SearchOutlined, EditOutlined } from "@ant-design/icons";
 import { formatCurrency } from '../../../../config/utils';
 import { Link } from 'react-router-dom';
+import { NavigationProps } from '../../../../hoc/Navigation';
 
 const { Title } = Typography;
 
 interface ProductProps {
   products: ProductResponse[];
   getProducts: Function;
+  navigationProps: NavigationProps;
 }
 
 interface ProductState {
@@ -57,6 +59,8 @@ export default class Product extends Component<ProductProps, ProductState> {
       {
         key: 'id',
         title: 'ID',
+        fixed: 'left',
+        width: 200,
         dataIndex: 'id',
       },
       {
@@ -128,10 +132,13 @@ export default class Product extends Component<ProductProps, ProductState> {
         dataIndex: 'operation',
         width: 100,
         render: (text: string, row: any) => (
-          <a href='#' onClick={(event) => {
+          <a href={`/create-update-product/${row.key}`} onClick={(event) => {
             event.preventDefault();
-            console.log({ navigateTo: row.key });
             
+            const { navigationProps } = this.props;
+            const { navigate } = navigationProps;
+
+            navigate(`/create-update-product/${row.key}`);
           }}><EditOutlined /> Edit</a>
         )
       },

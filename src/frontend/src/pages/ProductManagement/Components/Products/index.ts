@@ -1,4 +1,5 @@
 import { connect } from "react-redux";
+import withNavigation from "../../../../hoc/Navigation";
 import { RootState } from "../../../../store";
 import { getAllProducts } from "../../Store/Actions";
 import ProductComponent from "./Product";
@@ -15,4 +16,4 @@ const mapActionToProps = {
   getProducts: getAllProducts
 };
 
-export default connect(mapStateToProps, mapActionToProps)(ProductComponent);
+export default connect(mapStateToProps, mapActionToProps)(withNavigation(ProductComponent));
