@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import ProductForm from "./ProductForm";
 import { RootState } from "../../../../store";
 import withNavigation from "../../../../hoc/Navigation";
-import { getAllProducts } from "../../Store/Actions";
+import { addProduct, getAllProducts } from "../../Store/Actions";
 
 const mapStateToProps = (state: RootState) => {
   const { Product } = state;
@@ -13,7 +13,8 @@ const mapStateToProps = (state: RootState) => {
 };
 
 const mapActionToProps = {
-  getAllProducts
+  getAllProducts,
+  addProduct
 };
 
 export default connect(mapStateToProps, mapActionToProps)(withNavigation(ProductForm));

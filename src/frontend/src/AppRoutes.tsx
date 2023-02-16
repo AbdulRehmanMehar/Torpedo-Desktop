@@ -18,7 +18,7 @@ export const menu: Record<any, any> = {
     children: [
       {
         key: 'list-products',
-        path: '/',
+        path: '/list-products',
         label: 'Products',
         icon: <UnorderedListOutlined />,
         component: InvoiceList,

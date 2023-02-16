@@ -31,7 +31,7 @@ interface ProductFormProps {
   navigationProps: NavigationProps;
   products: ProductResponse[];
   getAllProducts: Function;
-  addInvoice: Function;
+  addProduct: Function;
 }
 
 interface ProductFormState {
@@ -279,31 +279,17 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
   submitTheForm = () => {
     const { formInputs } = this.state;
-    const { addInvoice, navigationProps } = this.props;
+    const { addProduct, navigationProps } = this.props;
     const { navigate } = navigationProps;
 
-    console.log({formInputs});
-    
-
-    if (Object.keys(formInputs).length < 7) return toast('Please add payment information'); 
-
-    const netPayable = (formInputs.productQuantity || 0) * (formInputs.productPrice || 0);
-    const { payments } = formInputs;
-    const paymentAmounts = payments.map((payment: any) => payment.amount);
-    const netPaid = paymentAmounts.reduce((last: number, current:number) => last + parseInt('' + current), 0);
-
-    if (netPaid !== netPayable) return toast(`Net Payable amount is ${netPayable} but Total Paid is ${netPaid}. Please fix it.`);
-
-
-    addInvoice({
+    addProduct({
       data: {...formInputs},
       onSuccess: () => {
-        toast('The invoice has been added');
-        navigate('/');
+        toast('The product has been added');
+        navigate('/list-products');
       }, 
       onError: () => {
         toast('Something went wrong while adding...');
-        navigate('/');
       }
     })
   }
@@ -322,7 +308,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
           width: formInputs['width'],
           type: formInputs['type'] || this.defaultTypeForProduct,
           quality: formInputs['quality'] || this.defaultQualityForProduct
-        }} style={{ margin: '0 20px'}} onFinish={(values: any) => console.log({ values })} onFinishFailed={(errorInfo: any) => console.log({ errorInfo })}>
+        }} style={{ margin: '0 20px'}} onFinish={this.submitTheForm} onFinishFailed={(errorInfo: any) => console.log({ errorInfo })}>
           {Object.keys(formFields).map((key, index) => {
             const { 
               label, 
