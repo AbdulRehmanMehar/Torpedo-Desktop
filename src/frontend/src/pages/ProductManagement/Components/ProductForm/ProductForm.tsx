@@ -10,8 +10,7 @@ import {
 import ReactDOM from "react-dom";
 import { ProductResponse } from "../../../../config/types";
 import { formatCurrency } from "../../../../config/utils";
-import path from "path";
-
+import { validate as uuidValidate } from 'uuid';
 
 const { Item } = Form;
 const { Option } = Select;
@@ -40,7 +39,7 @@ interface ProductFormState {
   options: any[];
   formInputs: Record<any, any>;
   suggestions: Record<any, any[]>;
-  formType?: 'Update';
+  formType: 'Add' | 'Update';
 }
 
 const formItemLayout = {
@@ -69,7 +68,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         quality: this.defaultQualityForProduct,
       },
       suggestions: {},
-      formType: undefined,
+      formType: 'Add',
     };
 
     this.numberOfFormFields = Object.keys(this.getFormFields()).length;
@@ -85,8 +84,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     const { getAllProducts, navigationProps } = this.props;
     const { pathParams } = navigationProps;
     const { productId } = pathParams;
-    
-    if (productId !== ":productId") {
+    if (uuidValidate(productId || '')) {
       this.setState({ formType: 'Update' });
     }
     
@@ -94,6 +92,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
     document.addEventListener('keyup', this.listenForKeyPress);
   }
+
 
   listenForKeyPress = (event: any) => {
     if (event.key !== 'Enter') return;
@@ -138,6 +137,18 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         }
       });
     }
+
+    const { getAllProducts, navigationProps } = this.props;
+    const { pathParams } = navigationProps;
+    const { productId } = pathParams;
+    const { formType } = this.state;
+    if (uuidValidate(productId || '') && formType !== 'Update') {
+      this.setState({ formType: 'Update' });
+    }
+    if (!uuidValidate(productId || '') && formType !== 'Add') {
+      this.setState({ formType: 'Add' });
+    }
+    
   }
 
   componentWillUnmount(): void {
@@ -309,7 +320,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
-        <Title level={2} style={{ margin: '25px' }}>{formType || 'Add'} Product</Title>
+        <Title level={2} style={{ margin: '25px' }}>{formType} Product</Title>
         <Form {...formItemLayout} initialValues={{
           height: formInputs['height'],
           width: formInputs['width'],

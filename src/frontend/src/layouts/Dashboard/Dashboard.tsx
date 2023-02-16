@@ -46,18 +46,23 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
     const currentPath = flattenRoutes.find((route: any) => {
       let comparable1 = route.path;
       let comparable2 = location.pathname;
+      let lastUrlChunk = undefined;
       if (route.path.includes(':')) {
         const array1 = comparable1.split('/');
         const array2 = comparable2.split('/');
         array1.pop();
-        array2.pop();
+        lastUrlChunk = array2.pop();
         comparable1 = array1.join('');
         comparable2 = array2.join('');
       }
       
       if (comparable1 === comparable2) {
-        route.label = route.label.replace('Create', 'Update');
-        route.icon = <EditOutlined />;
+        route.isupdate = false;
+        if (uuidValidate(lastUrlChunk || '')) {
+          route.isupdate = true;
+          console.log('for update');
+          
+        } 
         return true;
       }
       return false;
@@ -66,7 +71,7 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
       const childs = JsonStringify(menuItem.children);
       let compareable = location.pathname;
       const arrayOfPathChunks = location.pathname.split('/');
-      const lastElement = (arrayOfPathChunks.pop() || '').substring(1) || '';
+      const lastElement = (arrayOfPathChunks.pop() || '');
       
       if (uuidValidate(lastElement)) {
         compareable = arrayOfPathChunks.join('');
@@ -137,7 +142,16 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
             )}
             {currentPath && (
               <Breadcrumb.Item>
-                { currentPath.icon } { currentPath.label }
+                { currentPath.isupdate ? (
+                  <>
+                    <EditOutlined />&nbsp;
+                    {currentPath.label.replace('Create', 'Update')} 
+                  </>
+                ) :  (
+                  <>
+                    { currentPath.icon } { currentPath.label }
+                  </>
+                )}
               </Breadcrumb.Item>
             )}
           </Breadcrumb>
