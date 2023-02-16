@@ -8,6 +8,7 @@ import {
   SaveOutlined
 } from '@ant-design/icons';
 import ReactDOM from "react-dom";
+import { ProductResponse } from "../../../../config/types";
 
 
 const { Item } = Form;
@@ -28,7 +29,7 @@ interface FormFields {
 
 interface ProductFormProps {
   navigationProps: NavigationProps;
-  invoices: any[];
+  products: ProductResponse[];
   getAllProducts: Function;
   addInvoice: Function;
 }
@@ -51,7 +52,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   private inputRefs: RefObject<any>[];
   private numberOfFormFields: number;
   private submitButtonRef: RefObject<HTMLButtonElement>;
-  private defaultTypeForProduct = 'Tiles';
+  private defaultTypeForProduct = 'Tile';
+  private defaultQualityForProduct = 'A - High Quality';
   private formRef: Ref<FormInstance<any>>;
 
   constructor(props: ProductFormProps) {
@@ -61,6 +63,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       options: [],
       formInputs: {
         type: this.defaultTypeForProduct,
+        quality: this.defaultQualityForProduct,
       },
       suggestions: {},
     };
@@ -100,41 +103,27 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   }
 
   componentDidUpdate(prevProps: Readonly<ProductFormProps>, prevState: Readonly<ProductFormState>): void { 
-    const { payments } = this.state.formInputs;
-    const { payments: paymentsOld } = prevState.formInputs;
+    const { products } = this.props;
+    const { products: oldProducts } = prevProps;
 
-    if (payments && payments.length && (!paymentsOld || paymentsOld.length !== payments.length)) {
-      const index = this.inputRefs.length - 4;
-      const currentRefEl = this.inputRefs[index];
-      let loopItr = 1;
-      let nextRef = this.inputRefs[index + loopItr];
-      while (nextRef && !nextRef.current && this.inputRefs.length > (index + loopItr)){
-        nextRef = this.inputRefs[index + loopItr];
-        loopItr++;
-      }
-      
-      currentRefEl.current && currentRefEl.current.focus(); // focus on recently added fields
-    }
-
-    const { invoices } = this.props;
-    const { invoices: oldInvoices } = prevProps;
-
-    if (JSON.stringify(invoices) !== JSON.stringify(oldInvoices)) {
-      const productName = Array.from(new Set(invoices.map(invoice => `${invoice.productName}`))).map(value => ({ value }));
-      const productPrice = Array.from(new Set(invoices.map(invoice => `${invoice.productPrice}`))).map(value => ({ value }));
-      const customerName = Array.from(new Set(invoices.map(invoice => `${invoice.customerName}`))).map(value => ({ value }));
-      const customerPhone = Array.from(new Set(invoices.map(invoice => `${invoice.customerPhone}`))).map(value => ({value }));
-      const productQuantity = Array.from(new Set(invoices.map(invoice => `${invoice.productQuantity}`))).map(value => ({ value }));
-      const productMeasurements = Array.from(new Set(invoices.map(invoice => `${invoice.productMeasurements}`))).map(value => ({ value }));
+    if (JSON.stringify(products) !== JSON.stringify(oldProducts)) {
+      const brand = Array.from(new Set(products.map(product => `${product.brand}`))).map(value => ({ value }));
+      const price = Array.from(new Set(products.map(product => `${product.price}`))).map(value => ({ value }));
+      const name = Array.from(new Set(products.map(product => `${product.name}`))).map(value => ({ value }));
+      const quantity = Array.from(new Set(products.map(product => `${product.quantity}`))).map(value => ({value }));
+      const quality = Array.from(new Set(products.map(product => `${product.quality}`))).map(value => ({ value }));
+      const height = Array.from(new Set(products.map(product => `${product.height}`))).map(value => ({ value }));
+      const width = Array.from(new Set(products.map(product => `${product.width}`))).map(value => ({ value }));
 
       this.setState({ 
         suggestions: {
-          productName,
-          productPrice,
-          customerName,
-          customerPhone,
-          productQuantity,
-          productMeasurements
+          brand,
+          price,
+          name,
+          quantity,
+          quality,
+          height,
+          width,
         }
       });
     }
@@ -142,6 +131,10 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
   componentWillUnmount(): void {
     document.removeEventListener('keyup', this.listenForKeyPress);
+  }
+
+  formatCurrency = (number: number) => {
+    return new Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 }).format(number);
   }
 
   getFormFields = (): Record<any, FormFields & { readOnly?: boolean, type?: 'select' | 'number' | 'text', optional?: boolean, rules?: any[] }> => {
@@ -154,43 +147,54 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         value: formInputs['brand'] || '',
       },
       name: {
-        label: 'Product Name',
+        label: 'Name',
         placeholder: 'Masters Tiles',
         suggestions: [],
         value: formInputs['name'] || '',
       },
       price: {
-        label: 'Product Price',
+        label: 'Unit Price',
         placeholder: '1000',
         suggestions: [],
         type: 'number',
         value: formInputs['price'] || '',
       },
       quantity: {
-        label: 'Product Quantity',
+        label: 'Quantity',
         placeholder: '25',
         suggestions: [],
         type: 'number',
         value: formInputs['quantity'] || '',
       },
+      ...(!!this.state.formInputs.price && !!this.state.formInputs.quantity ? {
+        totalPrice: {
+          label: 'Total Price',
+          suggestions: [],
+          type: 'number',
+          value: `${this.formatCurrency((parseInt(this.state.formInputs.price) * parseInt(this.state.formInputs.quantity)))} PKR`,
+          optional: true,
+          rules: [],
+          readOnly: true,
+        }
+      } : {}),
       type: {
-        label: 'Product Type',
+        label: 'Type',
         placeholder: 'Tile',
         suggestions: [],
         type: 'select',
-        options: ['Tiles', 'Others'],
+        options: ['Tile', 'Others'],
         value: formInputs['type'] || this.defaultTypeForProduct,
       },
-      ...(this.state.formInputs.type === 'Tiles' ? {
+      ...(this.state.formInputs.type === 'Tile' ? {
         height: {
-          label: 'Product Height',
+          label: 'Height',
           placeholder: '7',
           suggestions: [],
           type: 'number',
           value: formInputs['height'] || '',
         },
         width: {
-          label: 'Product Width',
+          label: 'Width',
           placeholder: '10',
           suggestions: [],
           type: 'number',
@@ -198,10 +202,10 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         },
         ...(!!this.state.formInputs.height && !!this.state.formInputs.width ? {
           measurements: {
-            label: 'Measurements',
+            label: 'Unit Measurements',
             suggestions: [],
             type: 'number',
-            value: `${(parseInt(this.state.formInputs.height) * parseInt(this.state.formInputs.width)) / 1600}`,
+            value: `${(parseInt(this.state.formInputs.height) * parseInt(this.state.formInputs.width)) / 1600} meteres`,
             optional: true,
             rules: [],
             readOnly: true,
@@ -212,13 +216,22 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
             label: 'Total Measurements',
             suggestions: [],
             type: 'number',
-            value: `${(parseInt(this.state.formInputs.height) * parseInt(this.state.formInputs.width) * parseInt(this.state.formInputs.quantity)) / 1600}`,
+            value: `${(parseInt(this.state.formInputs.height) * parseInt(this.state.formInputs.width) * parseInt(this.state.formInputs.quantity)) / 1600} meters`,
             optional: true,
             rules: [],
             readOnly: true,
           }
         } : {})
-      } : {}),
+      } : {
+        quality: {
+          label: 'Quality',
+          placeholder: 'A',
+          suggestions: [],
+          type: 'select',
+          options: ['A - Hight Quality', 'B - Medium Quality', 'C - Low Quality'],
+          value: formInputs['quality'] || this.defaultQualityForProduct,
+        }
+      }),
     };
   }
 
@@ -309,7 +322,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         <Form {...formItemLayout} initialValues={{
           height: formInputs['height'],
           width: formInputs['width'],
-          type: this.defaultTypeForProduct
+          type: formInputs['type'] || this.defaultTypeForProduct,
+          quality: formInputs['quality'] || this.defaultQualityForProduct
         }} style={{ margin: '0 20px'}} onFinish={(values: any) => console.log({ values })} onFinishFailed={(errorInfo: any) => console.log({ errorInfo })}>
           {Object.keys(formFields).map((key, index) => {
             const { 
@@ -363,7 +377,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
                         <Input 
                           ref={currentRef}
                           autoFocus={index === 0}
-                          value={`${defaultValue} meters`}
+                          value={`${defaultValue}`}
                           type={'text'}
                           readOnly={true}
                           onKeyUp={(event: any) => {

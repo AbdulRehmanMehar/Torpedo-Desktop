@@ -5,10 +5,10 @@ import withNavigation from "../../../../hoc/Navigation";
 import { getAllProducts } from "../../Store/Actions";
 
 const mapStateToProps = (state: RootState) => {
-  const { Invoice } = state;
-  const { invoices } = Invoice;
+  const { Product } = state;
+  const { products } = Product;
   return {
-    invoices
+    products
   };
 };
 
