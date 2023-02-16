@@ -12,14 +12,18 @@ export const HttpClient = instance;
 
 const responseBody = (response: AxiosResponse) => response.data;
 
-const requests = {
-  get: async (url: string, config?: {}) => await instance.get(url, config).then(responseBody),
-  post: async (url: string, body: {}, config?: {}) =>
-    await instance.post(url, body, config).then(responseBody),
-  put: async (url: string, body: {}, config?: {}) =>
-    await instance.put(url, body, config).then(responseBody),
-  delete: async (url: string, config?: {}) => await instance.delete(url, config).then(responseBody),
-};
+
+export const getRequests = (globalConfig?: Record<any, any>) => {
+  return {
+    get: async (url: string, config?: {}) => await instance.get(url, config || globalConfig).then(responseBody),
+    post: async (url: string, body: {}, config?: {}) =>
+      await instance.post(url, body, config || globalConfig).then(responseBody),
+    put: async (url: string, body: {}, config?: {}) =>
+      await instance.put(url, body, config || globalConfig).then(responseBody),
+    delete: async (url: string, config?: {}) => await instance.delete(url, config || globalConfig).then(responseBody),
+  };
+}
+
 
 export const RequestInterceptor = (
   onFulfilled?:
@@ -47,4 +51,4 @@ export const ResponseInterceptor = (
 
 // export const PendingRequests = instance.call
 
-export default requests;
+export default getRequests();

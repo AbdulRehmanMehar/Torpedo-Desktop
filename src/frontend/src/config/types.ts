@@ -54,3 +54,17 @@ export interface AuthenticationResponse {
   user: AuthenticatedUser;
   tenant: AuthenticatedTenant;
 }
+
+export interface ProductResponse {
+  id: string;
+  brand: string;
+  createdAt: string;
+  height?: number;
+  name: string;
+  price: number;
+  quality?: string;
+  quantity: number;
+  type: 'Tile' | 'Other'
+  updatedAt: string;
+  width?: number;
+}

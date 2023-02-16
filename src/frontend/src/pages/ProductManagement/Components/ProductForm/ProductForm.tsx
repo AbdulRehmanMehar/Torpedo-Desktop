@@ -29,7 +29,7 @@ interface FormFields {
 interface ProductFormProps {
   navigationProps: NavigationProps;
   invoices: any[];
-  getInvoices: Function;
+  getAllProducts: Function;
   addInvoice: Function;
 }
 
@@ -75,8 +75,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   }
 
   componentDidMount(): void {
-    // const { getInvoices } = this.props;
-    // getInvoices();
+    const { getAllProducts } = this.props;
+    getAllProducts();
 
     document.addEventListener('keyup', this.listenForKeyPress);
   }

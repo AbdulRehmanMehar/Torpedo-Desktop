@@ -1,3 +1,6 @@
+import { AuthenticationStore } from "../pages/Authentication/Store/Reducers"
+import { AUTH_STORE_KEY } from "./constants"
+
 export const setLocalStorageWithExpiry = (key: string, value: any, ttl: number) => {
 	const now = new Date()
 
@@ -28,4 +31,9 @@ export const getLocalStorageWithExpiry = (key: string) => {
 
 export const removeLocalStorage = (key: string) => {
 	localStorage.removeItem(key)
+}
+
+export const getAccessToken = () => {
+	const auth = getLocalStorageWithExpiry(AUTH_STORE_KEY) as AuthenticationStore;
+	return auth.token;
 }
