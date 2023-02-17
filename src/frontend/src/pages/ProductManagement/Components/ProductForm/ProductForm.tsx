@@ -37,6 +37,7 @@ interface ProductFormProps {
   getSingleProduct: Function,
   updateProduct: Function;
   suggestions: ProductSuggestions;
+  getSuggestions: Function;
 }
 
 interface ProductFormState {
@@ -310,7 +311,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
   submitTheForm = () => {
     const { formInputs, formType } = this.state;
-    const { addProduct, updateProduct, navigationProps } = this.props;
+    const { addProduct, updateProduct, navigationProps, getSuggestions } = this.props;
     const { navigate } = navigationProps;
     const action = formType === 'Update' ? updateProduct : addProduct;
 
@@ -324,7 +325,10 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       onError: () => {
         toast.error(`Something went wrong while ${formType === 'Add' ? 'adding' : 'updating'} the product.`);
       },
-      onComplete: () => this.setState({ isProcessing: false })
+      onComplete: () => {
+        this.setState({ isProcessing: false });
+        getSuggestions();
+      }
     })
   }
 
