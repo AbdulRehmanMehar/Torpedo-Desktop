@@ -320,7 +320,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       data: {...formInputs},
       onSuccess: () => {
         toast.success(`The product has been ${formType === 'Add' ? 'added' : 'updated'}.`);
-        navigate('/list-products');
+        navigate('/');
       }, 
       onError: () => {
         toast.error(`Something went wrong while ${formType === 'Add' ? 'adding' : 'updating'} the product.`);
