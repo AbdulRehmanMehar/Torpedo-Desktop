@@ -1,7 +1,7 @@
 import { applyMiddleware, combineReducers, compose, configureStore, createAsyncThunk } from '@reduxjs/toolkit';
-import Invoice from './pages/InvoiceManagement/Store/Reducers';
-import Product from './pages/ProductManagement/Store/Reducers';
-import Authentication from './pages/Authentication/Store/Reducers';
+import Invoice from '../pages/InvoiceManagement/Store/Reducers';
+import Product from '../pages/ProductManagement/Store/Reducers';
+import Authentication from '../pages/Authentication/Store/Reducers';
 
 declare global {
   interface Window {
