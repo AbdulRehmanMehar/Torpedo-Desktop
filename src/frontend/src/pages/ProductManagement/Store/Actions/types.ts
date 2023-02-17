@@ -12,7 +12,10 @@ interface AddProduct {
 
 interface ListProducts {
   type: ActionTypes.LIST_PRODUCTS;
-  payload: ProductResponse[];
+  payload: {
+    products: ProductResponse[],
+    total: number;
+  };
 }
 
 

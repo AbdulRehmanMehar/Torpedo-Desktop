@@ -8,11 +8,11 @@ export const getAllProducts = (args: ActionArgs) => async (dispatch: Dispatch) =
   const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
-    const { products } = await listProducts();
+    const { products, total } = await listProducts();
     
     dispatch({
-        type: ActionTypes.LIST_PRODUCTS,
-        payload: products,
+      type: ActionTypes.LIST_PRODUCTS,
+      payload: { products, total },
     })
     
     onSuccess && onSuccess();
