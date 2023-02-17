@@ -20,7 +20,7 @@ export const menu: Record<any, any> = {
     children: [
       {
         key: 'list-products',
-        path: '/list-products',
+        path: '/',
         label: 'Products',
         icon: <UnorderedListOutlined />,
         component: ProductList,
@@ -40,7 +40,7 @@ export const menu: Record<any, any> = {
     children: [
       {
         key: 'list-invoices',
-        path: '/',
+        path: '/list-invoices',
         label: 'Invoices',
         icon: <UnorderedListOutlined />,
         component: InvoiceList,
