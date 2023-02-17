@@ -493,8 +493,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
           })}
 
           <Item label={' '} colon={false}>
-            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={isSubmitDisabled || isProcessing} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
-                {isProcessing ? <Spin /> : 'Save'}
+            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={isSubmitDisabled || isProcessing} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={isProcessing ? <Spin /> : <SaveOutlined />}>
+                {isProcessing ? null : 'Save'}
             </Button>
           </Item>
         </Form>
