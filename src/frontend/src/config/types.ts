@@ -70,14 +70,16 @@ export interface ProductResponse {
   width?: number;
 }
 
+export interface ProductSuggestions {
+  brand: string[];
+  name: string[];
+  width: number[];
+  height: number[];
+  quantity: number[];
+  price: number[];
+};
+
 export interface SuggestionsResponse {
-  products: {
-    brand: string[];
-    name: string[];
-    width: number[];
-    height: number[];
-    quantity: number[];
-    price: number[];
-  };
+  products: ProductSuggestions;
   invoices: any;
 }

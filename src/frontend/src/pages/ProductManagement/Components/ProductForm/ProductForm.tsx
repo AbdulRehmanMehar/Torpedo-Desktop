@@ -8,9 +8,10 @@ import {
   SaveOutlined
 } from '@ant-design/icons';
 import ReactDOM from "react-dom";
-import { ProductResponse } from "../../../../config/types";
+import { ProductResponse, ProductSuggestions, SuggestionsResponse } from "../../../../config/types";
 import { formatCurrency } from "../../../../config/utils";
 import { validate as uuidValidate } from 'uuid';
+import { SuggestionsStore } from "../../../../store/Reducers";
 
 const { Item } = Form;
 const { Option } = Select;
@@ -31,17 +32,16 @@ interface FormFields {
 interface ProductFormProps {
   navigationProps: NavigationProps;
   products: ProductResponse[];
-  getAllProducts: Function;
   addProduct: Function;
   product: ProductResponse;
   getSingleProduct: Function,
   updateProduct: Function;
+  suggestions: ProductSuggestions;
 }
 
 interface ProductFormState {
   options: any[];
   formInputs: Record<any, any>;
-  suggestions: Record<any, any[]>;
   formType: 'Add' | 'Update';
   isLoading: boolean;
   isProcessing: boolean;
@@ -68,7 +68,6 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       type: this.defaultTypeForProduct,
       quality: this.defaultQualityForProduct,
     },
-    suggestions: {},
     formType: 'Add',
     isLoading: false,
     isProcessing: false,
@@ -90,7 +89,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   }
 
   componentDidMount(): void {
-    const { getAllProducts, navigationProps } = this.props;
+    const { navigationProps } = this.props;
     const { pathParams } = navigationProps;
     const { productId } = pathParams;
     if (this.formRef && this.formRef.current) {
@@ -101,8 +100,6 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       this.setState({ ...this.initialState, formType: 'Update' });
       this.getProduct(productId);
     }
-    
-    // getAllProducts();
 
     document.addEventListener('keyup', this.listenForKeyPress);
   }
@@ -137,32 +134,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   }
 
   componentDidUpdate(prevProps: Readonly<ProductFormProps>, prevState: Readonly<ProductFormState>): void { 
-    const { products } = this.props;
-    const { products: oldProducts } = prevProps;
-
-    if (JSON.stringify(products) !== JSON.stringify(oldProducts)) {
-      const brand = Array.from(new Set(products.map(product => `${product.brand}`))).map(value => ({ value }));
-      const price = Array.from(new Set(products.map(product => `${product.price}`))).map(value => ({ value }));
-      const name = Array.from(new Set(products.map(product => `${product.name}`))).map(value => ({ value }));
-      const quantity = Array.from(new Set(products.map(product => `${product.quantity}`))).map(value => ({value }));
-      const quality = Array.from(new Set(products.map(product => `${product.quality}`))).map(value => ({ value }));
-      const height = Array.from(new Set(products.map(product => `${product.height}`))).map(value => ({ value }));
-      const width = Array.from(new Set(products.map(product => `${product.width}`))).map(value => ({ value }));
-
-      this.setState({ 
-        suggestions: {
-          brand,
-          price,
-          name,
-          quantity,
-          quality,
-          height,
-          width,
-        }
-      });
-    }
-
-    const { getAllProducts, navigationProps, product } = this.props;
+    const { navigationProps, product } = this.props;
     const { pathParams } = navigationProps;
     const { productId } = pathParams;
     const { formType } = this.state;
@@ -358,10 +330,13 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
-    const { formInputs, suggestions, formType, isLoading, isProcessing } = this.state;
+    const { suggestions } = this.props;
+    const { formInputs, formType, isLoading, isProcessing } = this.state;
     const formFields = this.getFormFields();
     const isSubmitDisabled = Object.keys(formFields).filter(key => !formFields[key].optional).map(key => !!this.state.formInputs[key]).includes(false);    
     
+    
+
     if (isLoading) return (
       <div style={{
         display: 'flex',
@@ -403,7 +378,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
 
             const value = formInputs[key] || '';
             const currentRef = this.inputRefs[index];
-            const currentSuggestion = suggestions[key] || [];
+            const currentSuggestion = (((suggestions as any) || {})[key] || []).map((value: any) => ({ value: `${value}` }));
 
             return (
               <Item key={`product[${key}]`} required={!optional} label={label} name={key} labelAlign={'left'} colon={false} rules={rules || [ { required: true, message: `${label} is required.` } ]}>
@@ -463,7 +438,9 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
                               }
                             });
                         }}
-                        onSearch={this.onSearch}>
+                        filterOption={(inputValue: string, option: any) =>
+                          option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                        }>
                         
                         <Input 
                           ref={currentRef}

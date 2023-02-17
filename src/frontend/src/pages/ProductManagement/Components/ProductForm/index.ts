@@ -5,16 +5,17 @@ import withNavigation from "../../../../hoc/Navigation";
 import { addProduct, updateProduct, getSingleProduct, getAllProducts } from "../../Store/Actions";
 
 const mapStateToProps = (state: RootState) => {
-  const { Product } = state;
+  const { Product, Suggestions } = state;
   const { products, product } = Product;
+  const { suggestions } = Suggestions;
   return {
     products,
-    product
+    product,
+    suggestions: suggestions?.products
   };
 };
 
 const mapActionToProps = {
-  getAllProducts,
   addProduct,
   getSingleProduct,
   updateProduct,
