@@ -8,5 +8,5 @@ const requests = getRequests({
     }
 });
 
-export const listProducts = (): Promise<{ products: ProductResponse[], total: number }> => requests.get('/products');
+export const listProducts = (params: any): Promise<{ products: ProductResponse[], total: number }> => requests.get(`/products?${new URLSearchParams(params).toString()}`);
 export const addProduct = (productData: Omit<ProductResponse, 'id'>): Promise<any> => requests.post('/products/add', {...productData});

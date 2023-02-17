@@ -12,6 +12,7 @@ const { Title } = Typography;
 
 interface ProductProps {
   products: ProductResponse[];
+  totalProducts: number;
   getProducts: Function;
   navigationProps: NavigationProps;
 }
@@ -26,16 +27,30 @@ export default class Product extends Component<ProductProps, ProductState> {
     super(props);
 
     this.state = {
-      isLoading: true,
+      isLoading: false,
     };
   }
 
   componentDidMount(): void {
-    const { getProducts } = this.props;
+    this.getProducts();
+  }
 
+  getProducts = () => {
+    const { getProducts, navigationProps } = this.props;
+    this.setState({ isLoading: true });
     getProducts({
+      data: {
+        page: navigationProps.searchParams.get('page') || 1,
+      },
       onComplete: () => this.setState({ isLoading: false })
     });    
+  }
+
+  componentDidUpdate(prevProps: Readonly<ProductProps>, prevState: Readonly<ProductState>, snapshot?: any): void {
+    const prevPageNumber = prevProps.navigationProps.searchParams.get('page');
+    const currentPageNumber = this.props.navigationProps.searchParams.get('page');
+    
+    if (prevPageNumber !== currentPageNumber) this.getProducts();
   }
 
   getColumnSearchProps = (dataIndex: DataIndex) => ({
@@ -148,8 +163,9 @@ export default class Product extends Component<ProductProps, ProductState> {
   render(): ReactNode {
     const columns = this.getColumns();
     const { isLoading } = this.state;
-    const { products } = this.props;
-    
+    const { products, totalProducts, navigationProps } = this.props;
+    const { searchParams, setSearchParams } = navigationProps;
+    const pageNumber = parseInt(searchParams.get('page') || '');
 
     return (
       <Layout style={{ minWidth: '100%', overflowX: 'auto' }}>
@@ -157,7 +173,12 @@ export default class Product extends Component<ProductProps, ProductState> {
         <Table 
           loading={isLoading} 
           columns={columns as (ColumnGroupType<any> | ColumnType<any>)[]} 
-          pagination={false}
+          pagination={{
+            total: totalProducts,
+            pageSize: 10,
+            current: (pageNumber || 1),
+            onChange: (page: number) => setSearchParams({ page })
+          }}
           dataSource={products.map(
             ({ id, brand, name, price, quantity, quality, height, width, type }, index) => ({
               key: id,

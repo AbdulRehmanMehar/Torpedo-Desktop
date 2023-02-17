@@ -6,9 +6,10 @@ import ProductComponent from "./Product";
 
 const mapStateToProps = (state: RootState) => {
   const { Product } = state;
-  const { products } = Product;
+  const { products, totalProducts } = Product;
   return {
-    products
+    products,
+    totalProducts
   };
 };
 
