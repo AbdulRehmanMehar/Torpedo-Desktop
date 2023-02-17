@@ -1,7 +1,7 @@
 import { menu } from '../../AppRoutes';
 import React, { Component } from 'react';
 import messages from '../../config/messages';
-import { Breadcrumb, Layout, Menu, Typography } from 'antd';
+import { Breadcrumb, Layout, Menu, Spin, Typography } from 'antd';
 import { NavigationProps } from '../../hoc/Navigation';
 import { EditOutlined, HomeOutlined } from '@ant-design/icons';
 import { REACT_APP_NAME } from '../../config/constants';
@@ -19,10 +19,12 @@ interface DashboardProps {
   navigationProps: NavigationProps;
   authentication: AuthenticationStore;
   logout: Function;
+  getSuggestions: Function;
   children: JSX.Element|JSX.Element[];
 }
 
 interface DashboardState {
+  isLoading: boolean;
   isSidebarCollapsed: boolean;
 }
 
@@ -32,12 +34,21 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
     super(props);
 
     this.state = {
+      isLoading: false,
       isSidebarCollapsed: false,
     }
   }
 
+  componentDidMount(): void {
+    const { getSuggestions } = this.props;
+    this.setState({ isLoading: true });
+    getSuggestions({
+      onComplete: () => this.setState({ isLoading: false })
+    });
+  }
+
   render(): React.ReactNode {
-    const { isSidebarCollapsed } = this.state;
+    const { isSidebarCollapsed, isLoading } = this.state;
     const { children, navigationProps, authentication, logout } = this.props;
     const routerMenu = Object.keys(menu).map(key => menu[key]);
     const flattenRoutes = routerMenu.map(menuItem => menuItem.children).flat(Infinity);
@@ -80,7 +91,7 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
       return childs.includes(compareable)
     });
 
-    return (
+  return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider 
         width={250}
@@ -130,33 +141,39 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
 
       </Sider>
       <Layout className="site-layout">
-        <Content style={{ margin: '0 16px' }}>
-          <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item>
-              <HomeOutlined /> { REACT_APP_NAME }
-            </Breadcrumb.Item>
-            {parentSection &&  (
+        {isLoading ? (
+          <div style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+            <Spin size='large' />
+          </div>
+        ) : (
+          <Content style={{ margin: '0 16px' }}>
+            <Breadcrumb style={{ margin: '16px 0' }}>
               <Breadcrumb.Item>
-                { parentSection.icon } { parentSection.label }
+                <HomeOutlined /> { REACT_APP_NAME }
               </Breadcrumb.Item>
-            )}
-            {currentPath && (
-              <Breadcrumb.Item>
-                { currentPath.isupdate ? (
-                  <>
-                    <EditOutlined />&nbsp;
-                    {currentPath.label.replace('Create', 'Update')} 
-                  </>
-                ) :  (
-                  <>
-                    { currentPath.icon } { currentPath.label }
-                  </>
-                )}
-              </Breadcrumb.Item>
-            )}
-          </Breadcrumb>
-          { children }
-        </Content>
+              {parentSection &&  (
+                <Breadcrumb.Item>
+                  { parentSection.icon } { parentSection.label }
+                </Breadcrumb.Item>
+              )}
+              {currentPath && (
+                <Breadcrumb.Item>
+                  { currentPath.isupdate ? (
+                    <>
+                      <EditOutlined />&nbsp;
+                      {currentPath.label.replace('Create', 'Update')} 
+                    </>
+                  ) :  (
+                    <>
+                      { currentPath.icon } { currentPath.label }
+                    </>
+                  )}
+                </Breadcrumb.Item>
+              )}
+            </Breadcrumb>
+            { children }
+          </Content>
+        )}
         <Footer style={{ textAlign: 'center' }}>
           <span>{messages.FOOTER}&nbsp;</span>
           <span>Developed with&nbsp;</span> 

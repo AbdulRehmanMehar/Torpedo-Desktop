@@ -3,7 +3,7 @@ import { ActionArgs } from "../../config/types";
 import { fetchSuggestions } from "../httpMethods";
 import { ActionTypes } from "./types";
 
-export const getAllProducts = (args: ActionArgs) => async (dispatch: Dispatch) => {
+export const getSuggestions = (args: ActionArgs) => async (dispatch: Dispatch) => {
   const { data, onSuccess, onComplete, onError } = args || {};
 
   try {

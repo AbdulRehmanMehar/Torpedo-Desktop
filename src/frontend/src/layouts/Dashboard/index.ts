@@ -3,6 +3,7 @@ import withNavigation from '../../hoc/Navigation';
 import { connect } from "react-redux";
 import { RootState } from "../../store";
 import { logout } from "../../pages/Authentication/Store/Actions";
+import { getSuggestions } from "../../store/Actions";
 
 const mapStateToProps = (state: RootState) => {
     const { Authentication } = state;
@@ -13,5 +14,6 @@ const mapStateToProps = (state: RootState) => {
   
 
 export default connect(mapStateToProps, {
-    logout
+  logout,
+  getSuggestions
 })(withNavigation(Dashboard));
