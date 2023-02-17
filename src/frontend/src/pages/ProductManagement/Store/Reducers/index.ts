@@ -31,6 +31,19 @@ const productsReducer = (state = initalState, action: Action) => {
         product: action.payload,
       }
     
+    case ActionTypes.UPDATE_PRODUCT:    
+      return {
+        ...state,
+        products: [...state.products.filter(product => product.id !== action.payload.id), action.payload],
+      }
+    
+    case ActionTypes.ADD_PRODUCT: 
+      return {
+        ...state,
+        products: [...state.products, action.payload],
+        totalProducts: state.totalProducts + 1,
+      }
+
     default: 
       return state;
   }

@@ -18,7 +18,7 @@ export const getAllProducts = (args: ActionArgs) => async (dispatch: Dispatch) =
     onSuccess && onSuccess();
   } catch (error: any) {
     console.log(error);
-    const message = error.response.data.error_description;
+    const message = error.message  || error.response.data.error_description;
     onError && onError(message);
   } finally {
     onComplete && onComplete();
@@ -41,7 +41,7 @@ export const addProduct = (args: ActionArgs) => async (dispatch: Dispatch) => {
     onSuccess && onSuccess();
   } catch (error: any) {
     console.log(error);
-    const message = error.response.data.error_description;
+    const message = error.message  || error.response.data.error_description;
     onError && onError(message);
   } finally {
     onComplete && onComplete();
@@ -62,7 +62,7 @@ export const getSingleProduct = (args: ActionArgs) => async (dispatch: Dispatch)
     onSuccess && onSuccess();
   } catch (error: any) {
     console.log(error);
-    const message = error.response.data.error_description;
+    const message = error.message  || error.response.data.error_description;
     onError && onError(message);
   } finally {
     onComplete && onComplete();
@@ -73,19 +73,17 @@ export const updateProduct = (args: ActionArgs) => async (dispatch: Dispatch) =>
   const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
-    const product = await updateTheProduct(data);
-    console.log(product);
-    
+    const { product } = await updateTheProduct(data);   
     
     dispatch({
-        type: ActionTypes.LIST_PRODUCTS,
-        payload: product,
-    })
+      type: ActionTypes.UPDATE_PRODUCT,
+      payload: product,
+    });
     
     onSuccess && onSuccess();
   } catch (error: any) {
     console.log(error);
-    const message = error.response.data.error_description;
+    const message = error.message  || error.response.data.error_description;
     onError && onError(message);
   } finally {
     onComplete && onComplete();

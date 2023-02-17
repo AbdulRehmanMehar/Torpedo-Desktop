@@ -179,7 +179,7 @@ export default class Product extends Component<ProductProps, ProductState> {
             current: (pageNumber || 1),
             onChange: (page: number) => setSearchParams({ page })
           }}
-          dataSource={products.map(
+          dataSource={(products || []).map(
             ({ id, brand, name, price, quantity, quality, height, width, type }, index) => ({
               key: id,
               id: (index + 1),

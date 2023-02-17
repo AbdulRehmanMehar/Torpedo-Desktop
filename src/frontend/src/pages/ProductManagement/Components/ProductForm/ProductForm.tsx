@@ -1,4 +1,4 @@
-import { AutoComplete, Button, Form, FormInstance, Input, InputRef, Layout, Select, Typography } from "antd";
+import { AutoComplete, Button, Form, FormInstance, Input, InputRef, Layout, Select, Spin, Typography } from "antd";
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
@@ -44,6 +44,7 @@ interface ProductFormState {
   suggestions: Record<any, any[]>;
   formType: 'Add' | 'Update';
   isLoading: boolean;
+  isProcessing: boolean;
 }
 
 const formItemLayout = {
@@ -60,7 +61,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   private submitButtonRef: RefObject<HTMLButtonElement>;
   private defaultTypeForProduct = 'Tile';
   private defaultQualityForProduct = 'A - High Quality';
-  private formRef: Ref<FormInstance<any>>;
+  private formRef: RefObject<FormInstance<any>>;
   private initialState = {
     options: [],
     formInputs: {
@@ -70,6 +71,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     suggestions: {},
     formType: 'Add',
     isLoading: false,
+    isProcessing: false,
   };
 
 
@@ -83,7 +85,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     const numberOfRefs = this.numberOfFormFields + 1/** for add payment information button */;
     this.inputRefs = [...Array(numberOfRefs)].map(() => createRef());
 
-    this.formRef = createRef();
+    this.formRef = createRef<FormInstance>();
     this.submitButtonRef = createRef();
   }
 
@@ -91,12 +93,16 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     const { getAllProducts, navigationProps } = this.props;
     const { pathParams } = navigationProps;
     const { productId } = pathParams;
+    if (this.formRef && this.formRef.current) {
+      this.formRef.current.resetFields();
+      console.log('reset fields mounted');
+    }
     if (productId && uuidValidate(productId || '')) {
       this.setState({ ...this.initialState, formType: 'Update' });
       this.getProduct(productId);
     }
     
-    getAllProducts();
+    // getAllProducts();
 
     document.addEventListener('keyup', this.listenForKeyPress);
   }
@@ -107,6 +113,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     this.setState({ isLoading: true });
     getSingleProduct({
       data: { productId },
+      onError: (message: string) => toast.error(message),
       onComplete: () => this.setState({ isLoading: false })
     })
   }
@@ -163,7 +170,14 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       this.setState({ formType: 'Update' });
     }
     if (!uuidValidate(productId || '') && formType !== 'Add') {
-      this.setState({ formType: 'Add' });
+      if (this.formRef && this.formRef.current) {
+        this.formRef.current.resetFields();
+        console.log('reset fields');
+      }
+      this.setState({ formInputs: {
+        type: this.defaultTypeForProduct,
+        quality: this.defaultQualityForProduct,
+      }, formType: 'Add' });
     }
 
     if (formType === 'Update' && !!product && prevProps.product !== product) {
@@ -171,7 +185,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         ...prevState,
         formInputs: {
           ...product,
-          ...prevState.formInputs
+          type: product['type'] ||this.defaultTypeForProduct,
+          quality: product['quality'] ||this.defaultQualityForProduct,
         }
       }));
     }
@@ -327,21 +342,23 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     const { navigate } = navigationProps;
     const action = formType === 'Update' ? updateProduct : addProduct;
 
+    this.setState({ isProcessing: true });
     action({
       data: {...formInputs},
       onSuccess: () => {
-        toast(`The product has been ${formType === 'Add' ? 'added' : 'updated'}.`);
+        toast.success(`The product has been ${formType === 'Add' ? 'added' : 'updated'}.`);
         navigate('/list-products');
       }, 
       onError: () => {
-        toast(`Something went wrong while ${formType === 'Add' ? 'adding' : 'updating'} the product.`);
-      }
+        toast.error(`Something went wrong while ${formType === 'Add' ? 'adding' : 'updating'} the product.`);
+      },
+      onComplete: () => this.setState({ isProcessing: false })
     })
   }
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
-    const { formInputs, suggestions, formType, isLoading } = this.state;
+    const { formInputs, suggestions, formType, isLoading, isProcessing } = this.state;
     const formFields = this.getFormFields();
     const isSubmitDisabled = Object.keys(formFields).filter(key => !formFields[key].optional).map(key => !!this.state.formInputs[key]).includes(false);    
     
@@ -360,9 +377,9 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     );
 
     return (
-      <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
+      <Layout key={formType} style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2} style={{ margin: '25px' }}>{formType} Product</Title>
-        <Form {...formItemLayout} initialValues={formType === 'Update' ? {
+        <Form ref={this.formRef} {...formItemLayout} initialValues={formType === 'Update' ? {
             ...formInputs,
             type: formInputs['type'] || this.defaultTypeForProduct,
             quality: formInputs['quality'] || this.defaultQualityForProduct,
@@ -476,8 +493,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
           })}
 
           <Item label={' '} colon={false}>
-            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={isSubmitDisabled} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
-                Save
+            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={isSubmitDisabled || isProcessing} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
+                {isProcessing ? <Spin /> : 'Save'}
             </Button>
           </Item>
         </Form>
