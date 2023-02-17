@@ -2,7 +2,7 @@ import { AutoComplete, Button, Form, FormInstance, Input, InputRef, Layout, Sele
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
-
+import { Skeleton } from 'antd';
 import {
   PlusOutlined,
   SaveOutlined
@@ -33,6 +33,9 @@ interface ProductFormProps {
   products: ProductResponse[];
   getAllProducts: Function;
   addProduct: Function;
+  product: ProductResponse;
+  getSingleProduct: Function,
+  updateProduct: Function;
 }
 
 interface ProductFormState {
@@ -40,6 +43,7 @@ interface ProductFormState {
   formInputs: Record<any, any>;
   suggestions: Record<any, any[]>;
   formType: 'Add' | 'Update';
+  isLoading: boolean;
 }
 
 const formItemLayout = {
@@ -57,19 +61,22 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
   private defaultTypeForProduct = 'Tile';
   private defaultQualityForProduct = 'A - High Quality';
   private formRef: Ref<FormInstance<any>>;
+  private initialState = {
+    options: [],
+    formInputs: {
+      type: this.defaultTypeForProduct,
+      quality: this.defaultQualityForProduct,
+    },
+    suggestions: {},
+    formType: 'Add',
+    isLoading: false,
+  };
+
 
   constructor(props: ProductFormProps) {
     super(props);
 
-    this.state = {
-      options: [],
-      formInputs: {
-        type: this.defaultTypeForProduct,
-        quality: this.defaultQualityForProduct,
-      },
-      suggestions: {},
-      formType: 'Add',
-    };
+    this.state = this.initialState as ProductFormState;
 
     this.numberOfFormFields = Object.keys(this.getFormFields()).length;
 
@@ -84,8 +91,9 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     const { getAllProducts, navigationProps } = this.props;
     const { pathParams } = navigationProps;
     const { productId } = pathParams;
-    if (uuidValidate(productId || '')) {
-      this.setState({ formType: 'Update' });
+    if (productId && uuidValidate(productId || '')) {
+      this.setState({ ...this.initialState, formType: 'Update' });
+      this.getProduct(productId);
     }
     
     getAllProducts();
@@ -93,6 +101,15 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     document.addEventListener('keyup', this.listenForKeyPress);
   }
 
+
+  getProduct = (productId: string) => {
+    const { getSingleProduct } = this.props;
+    this.setState({ isLoading: true });
+    getSingleProduct({
+      data: { productId },
+      onComplete: () => this.setState({ isLoading: false })
+    })
+  }
 
   listenForKeyPress = (event: any) => {
     if (event.key !== 'Enter') return;
@@ -138,7 +155,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
       });
     }
 
-    const { getAllProducts, navigationProps } = this.props;
+    const { getAllProducts, navigationProps, product } = this.props;
     const { pathParams } = navigationProps;
     const { productId } = pathParams;
     const { formType } = this.state;
@@ -147,6 +164,12 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     }
     if (!uuidValidate(productId || '') && formType !== 'Add') {
       this.setState({ formType: 'Add' });
+    }
+
+    if (formType === 'Update' && !!product && prevProps.product !== product) {
+      this.setState({
+        formInputs: {...product}
+      });
     }
     
   }
@@ -294,34 +317,48 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     return false;
   }
 
-
   submitTheForm = () => {
-    const { formInputs } = this.state;
-    const { addProduct, navigationProps } = this.props;
+    const { formInputs, formType } = this.state;
+    const { addProduct, updateProduct, navigationProps } = this.props;
     const { navigate } = navigationProps;
+    const action = formType === 'Update' ? updateProduct : addProduct;
 
-    addProduct({
+    action({
       data: {...formInputs},
       onSuccess: () => {
-        toast('The product has been added');
+        toast(`The product has been ${formType === 'Add' ? 'added' : 'updated'}.`);
         navigate('/list-products');
       }, 
       onError: () => {
-        toast('Something went wrong while adding...');
+        toast(`Something went wrong while ${formType === 'Add' ? 'adding' : 'updating'} the product.`);
       }
     })
   }
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
-    const { formInputs, suggestions, formType } = this.state;
+    const { formInputs, suggestions, formType, isLoading } = this.state;
     const formFields = this.getFormFields();
     const isSubmitDisabled = Object.keys(formFields).filter(key => !formFields[key].optional).map(key => !!this.state.formInputs[key]).includes(false);    
     
+    if (isLoading) return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%',
+        width: '100%'
+      }}>
+        <div style={{ width: '80%' }}>
+          <Skeleton active /><br />
+        </div>
+      </div>
+    );
+
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2} style={{ margin: '25px' }}>{formType} Product</Title>
-        <Form {...formItemLayout} initialValues={{
+        <Form {...formItemLayout} initialValues={formType === 'Update' ? formInputs as any : {
           height: formInputs['height'],
           width: formInputs['width'],
           type: formInputs['type'] || this.defaultTypeForProduct,

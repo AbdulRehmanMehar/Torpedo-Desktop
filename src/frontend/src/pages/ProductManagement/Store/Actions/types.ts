@@ -2,12 +2,19 @@ import { AuthenticationResponse, ProductResponse } from "../../../../config/type
 
 export enum ActionTypes {
   ADD_PRODUCT = 'ADD_PRODUCT',
+  GET_PRODUCT = 'GET_PRODUCT',
   LIST_PRODUCTS = 'LIST_PRODUCTS',
+  UPDATE_PRODUCT = 'UPDATE_PRODUCT',
 }
 
 interface AddProduct {
   type: ActionTypes.ADD_PRODUCT;
   payload: AuthenticationResponse;
+}
+
+interface GetProduct {
+  type: ActionTypes.GET_PRODUCT;
+  payload: ProductResponse;
 }
 
 interface ListProducts {
@@ -18,5 +25,9 @@ interface ListProducts {
   };
 }
 
+interface UpdateProduct {
+  type: ActionTypes.UPDATE_PRODUCT;
+  payload: ProductResponse;
+}
 
-export type Action = AddProduct | ListProducts;
+export type Action = AddProduct | ListProducts | GetProduct | UpdateProduct;
