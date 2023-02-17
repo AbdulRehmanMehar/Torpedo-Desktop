@@ -167,9 +167,13 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     }
 
     if (formType === 'Update' && !!product && prevProps.product !== product) {
-      this.setState({
-        formInputs: {...product}
-      });
+      this.setState(prevState => ({
+        ...prevState,
+        formInputs: {
+          ...product,
+          ...prevState.formInputs
+        }
+      }));
     }
     
   }
@@ -358,11 +362,15 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2} style={{ margin: '25px' }}>{formType} Product</Title>
-        <Form {...formItemLayout} initialValues={formType === 'Update' ? formInputs as any : {
-          height: formInputs['height'],
-          width: formInputs['width'],
-          type: formInputs['type'] || this.defaultTypeForProduct,
-          quality: formInputs['quality'] || this.defaultQualityForProduct
+        <Form {...formItemLayout} initialValues={formType === 'Update' ? {
+            ...formInputs,
+            type: formInputs['type'] || this.defaultTypeForProduct,
+            quality: formInputs['quality'] || this.defaultQualityForProduct,
+          } as any : {
+            height: formInputs['height'],
+            width: formInputs['width'],
+            type: formInputs['type'] || this.defaultTypeForProduct,
+            quality: formInputs['quality'] || this.defaultQualityForProduct
         }} style={{ margin: '0 20px'}} onFinish={this.submitTheForm} onFinishFailed={(errorInfo: any) => console.log({ errorInfo })}>
           {Object.keys(formFields).map((key, index) => {
             const { 

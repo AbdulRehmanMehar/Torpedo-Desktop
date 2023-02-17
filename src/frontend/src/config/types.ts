@@ -64,7 +64,8 @@ export interface ProductResponse {
   price: number;
   quality?: string;
   quantity: number;
-  type: 'Tile' | 'Other'
+  type: 'Tile' | 'Other';
+  tenantId?: string;
   updatedAt: string;
   width?: number;
 }
