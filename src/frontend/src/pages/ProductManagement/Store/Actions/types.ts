@@ -9,7 +9,7 @@ export enum ActionTypes {
 
 interface AddProduct {
   type: ActionTypes.ADD_PRODUCT;
-  payload: AuthenticationResponse;
+  payload: ProductResponse;
 }
 
 interface GetProduct {

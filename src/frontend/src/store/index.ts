@@ -2,6 +2,7 @@ import { applyMiddleware, combineReducers, compose, configureStore, createAsyncT
 import Invoice from '../pages/InvoiceManagement/Store/Reducers';
 import Product from '../pages/ProductManagement/Store/Reducers';
 import Authentication from '../pages/Authentication/Store/Reducers';
+import Suggestions from './Reducers';
 
 declare global {
   interface Window {
@@ -16,6 +17,7 @@ const store = configureStore({
     Invoice,
     Product,
     Authentication,
+    Suggestions
   }),
 })
 

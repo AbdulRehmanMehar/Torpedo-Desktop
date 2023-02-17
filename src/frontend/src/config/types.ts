@@ -69,3 +69,15 @@ export interface ProductResponse {
   updatedAt: string;
   width?: number;
 }
+
+export interface SuggestionsResponse {
+  products: {
+    brand: string[];
+    name: string[];
+    width: number[];
+    height: number[];
+    quantity: number[];
+    price: number[];
+  };
+  invoices: any;
+}
