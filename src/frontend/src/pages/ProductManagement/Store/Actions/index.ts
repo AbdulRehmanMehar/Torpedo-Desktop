@@ -29,14 +29,12 @@ export const addProduct = (args: ActionArgs) => async (dispatch: Dispatch) => {
   const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
-    const product = await createProduct(data);
-    console.log(product);
+    const {product} = await createProduct(data);
     
-    
-    // dispatch({
-    //     type: ActionTypes.LIST_PRODUCTS,
-    //     payload: products,
-    // })
+    dispatch({
+        type: ActionTypes.ADD_PRODUCT,
+        payload: product,
+    })
     
     onSuccess && onSuccess();
   } catch (error: any) {
