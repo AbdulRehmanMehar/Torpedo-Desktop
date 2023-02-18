@@ -5,10 +5,11 @@ import withNavigation from "../../../../hoc/Navigation";
 import { getInvoices, addInvoice } from "../../Store/Actions";
 
 const mapStateToProps = (state: RootState) => {
-  const { Invoice } = state;
+  const { Invoice, Suggestions } = state;
   const { invoices } = Invoice;
+  const { suggestions } = Suggestions;
   return {
-    invoices
+    suggestions: suggestions?.invoices
   };
 };
 

@@ -35,5 +35,5 @@ export const removeLocalStorage = (key: string) => {
 
 export const getAccessToken = () => {
 	const auth = getLocalStorageWithExpiry(AUTH_STORE_KEY) as AuthenticationStore;
-	return auth.token;
+	return (auth || {}).token;
 }

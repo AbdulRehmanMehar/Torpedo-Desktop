@@ -1,28 +1,27 @@
 interface PaymentInterface {
-  id: string;
   paymentType: string;
   amount: number;
-  tenantId: string;
-  invoiceId: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 type Payment = PaymentInterface | Omit<PaymentInterface, 'id' | 'tenantId' | 'invoiceId' | 'createdAt' | 'updatedAt'>;
 
+interface CustomerInterface {
+  name: string;
+  phone: string;
+}
+
+interface ProductAsInvoiceItem {
+  id: string;
+  price: number;
+  quantity: number;
+}
+
 interface InvoiceInterface {
   id: string;
-  customerName: string;
-  customerPhone: string;
-  productName: string;
-  productQuantity: number;
-  productPrice: number;
-  productMeasurements: string;
-  netPayable: string;
-  tenantId: string;
-  createdAt: string;
-  updatedAt: string;
+  customer: CustomerInterface;
+  products: ProductAsInvoiceItem[];
   payments: Payment[];
+  netPayable?: number;
 }
 
 export type Invoice = InvoiceInterface;
@@ -79,7 +78,20 @@ export interface ProductSuggestions {
   price: number[];
 };
 
+export interface InvoiceSuggestions {
+  products: Array<{
+    id: string;
+    price: number;
+    title: string;
+  }>;
+  customers: Array<{
+    id: string;
+    name: string;
+    phone: string;
+  }>
+}
+
 export interface SuggestionsResponse {
   products: ProductSuggestions;
-  invoices: any;
+  invoices: {};
 }

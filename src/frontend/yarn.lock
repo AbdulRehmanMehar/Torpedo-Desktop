@@ -2317,6 +2317,28 @@
     "@typescript-eslint/types" "5.39.0"
     eslint-visitor-keys "^3.3.0"
 
+"@validate-phone/antd-input@^1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@validate-phone/antd-input/-/antd-input-1.6.3.tgz#4dd7ba10f4e079d709904d4952a2cfc0fa6f46ed"
+  integrity sha512-dbAw2I2W1Aygagh+4OJWXhRVES/xaNc94HUJ5yKyU2FRAPAmXMtjcvhQtL0nlwYyFFgEDhdp/jJJNTyplyqDAQ==
+  dependencies:
+    "@validate-phone/react-input" "^1.6.2"
+    "@validate-phone/web" "^1.6.1"
+    lodash "^4.17.21"
+    use-debounce "^7.0.0"
+
+"@validate-phone/react-input@^1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@validate-phone/react-input/-/react-input-1.6.2.tgz#8eb8cf770c56105bfb940f8055ef823f7963a025"
+  integrity sha512-AwsHcTTHGD3cgs8bYHn8q3Ydybt1n/pgWSdzcTB+/JupVX9AHrCulNkLONxqfwwRpqNC8nPvmJEdDS+jWoGCpw==
+  dependencies:
+    "@validate-phone/web" "^1.6.1"
+
+"@validate-phone/web@^1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@validate-phone/web/-/web-1.6.1.tgz#4ef7ee8b4350f63837266d544239a71393f3e6c3"
+  integrity sha512-rIYLmxE3r0e3cKBp4QYHNWHdwAbDeS1kB9qe45FruZ6M2Z9zyg8GF52hTasvyPp6a9xqh859MBTpYprYd+XVTg==
+
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.1.tgz#2bfd767eae1a6996f432ff7e8d7fc75679c0b6a7"
@@ -9311,6 +9333,11 @@ url-parse@^1.5.3:
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
+
+use-debounce@^7.0.0:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/use-debounce/-/use-debounce-7.0.1.tgz#380e6191cc13ad29f8e2149a12b5c37cc2891190"
+  integrity sha512-fOrzIw2wstbAJuv8PC9Vg4XgwyTLEOdq4y/Z3IhVl8DAE4svRcgyEUvrEXu+BMNgMoc3YND6qLT61kkgEKXh7Q==
 
 use-sync-external-store@^1.0.0:
   version "1.2.0"

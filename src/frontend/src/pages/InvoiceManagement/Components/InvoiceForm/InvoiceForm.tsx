@@ -1,7 +1,8 @@
-import { AutoComplete, Button, Form, Input, InputRef, Layout, Select, Typography } from "antd";
+import { AutoComplete, Button, Form, FormInstance, Input, InputRef, Layout, Select, Space, Typography } from "antd";
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
+import { MinusCircleOutlined } from '@ant-design/icons';
 
 import {
   PlusOutlined,
@@ -10,6 +11,7 @@ import {
 import ReactDOM from "react-dom";
 import { Invoice } from "../../Helpers/types";
 import { addInvoice } from "../../Store/Actions";
+import { InvoiceSuggestions } from "../../../../config/types";
 
 
 const { Item } = Form;
@@ -30,7 +32,7 @@ interface FormFields {
 
 interface InvoiceFormProps {
   navigationProps: NavigationProps;
-  invoices: Invoice[];
+  suggestions: InvoiceSuggestions;
   getInvoices: Function;
   addInvoice: Function;
 }
@@ -38,7 +40,7 @@ interface InvoiceFormProps {
 interface InvoiceFormState {
   options: any[];
   formInputs: Record<any, any>;
-  suggestions: Record<any, any[]>;
+  initialValues: any;
 }
 
 const formItemLayout = {
@@ -53,14 +55,15 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
   private inputRefs: RefObject<any>[];
   private numberOfFormFields: number;
   private submitButtonRef: RefObject<HTMLButtonElement>;
-
+  private formRef: RefObject<FormInstance<any>>;
+  
   constructor(props: InvoiceFormProps) {
     super(props);
 
     this.state = {
       options: [],
       formInputs: {},
-      suggestions: {},
+      initialValues: {}
     };
 
     this.numberOfFormFields = Object.keys(this.getFormFields()).length;
@@ -69,6 +72,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     this.inputRefs = [...Array(numberOfRefs)].map(() => createRef());
 
     this.submitButtonRef = createRef();
+    this.formRef = createRef<FormInstance>();
   }
 
   componentDidMount(): void {
@@ -113,28 +117,28 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
       currentRefEl.current && currentRefEl.current.focus(); // focus on recently added fields
     }
 
-    const { invoices } = this.props;
-    const { invoices: oldInvoices } = prevProps;
+    // const { invoices } = this.props;
+    // const { invoices: oldInvoices } = prevProps;
 
-    if (JSON.stringify(invoices) !== JSON.stringify(oldInvoices)) {
-      const productName = Array.from(new Set(invoices.map(invoice => `${invoice.productName}`))).map(value => ({ value }));
-      const productPrice = Array.from(new Set(invoices.map(invoice => `${invoice.productPrice}`))).map(value => ({ value }));
-      const customerName = Array.from(new Set(invoices.map(invoice => `${invoice.customerName}`))).map(value => ({ value }));
-      const customerPhone = Array.from(new Set(invoices.map(invoice => `${invoice.customerPhone}`))).map(value => ({value }));
-      const productQuantity = Array.from(new Set(invoices.map(invoice => `${invoice.productQuantity}`))).map(value => ({ value }));
-      const productMeasurements = Array.from(new Set(invoices.map(invoice => `${invoice.productMeasurements}`))).map(value => ({ value }));
+    // if (JSON.stringify(invoices) !== JSON.stringify(oldInvoices)) {
+    //   const productName = Array.from(new Set(invoices.map(invoice => `${invoice.productName}`))).map(value => ({ value }));
+    //   const productPrice = Array.from(new Set(invoices.map(invoice => `${invoice.productPrice}`))).map(value => ({ value }));
+    //   const customerName = Array.from(new Set(invoices.map(invoice => `${invoice.customerName}`))).map(value => ({ value }));
+    //   const customerPhone = Array.from(new Set(invoices.map(invoice => `${invoice.customerPhone}`))).map(value => ({value }));
+    //   const productQuantity = Array.from(new Set(invoices.map(invoice => `${invoice.productQuantity}`))).map(value => ({ value }));
+    //   const productMeasurements = Array.from(new Set(invoices.map(invoice => `${invoice.productMeasurements}`))).map(value => ({ value }));
 
-      this.setState({ 
-        suggestions: {
-          productName,
-          productPrice,
-          customerName,
-          customerPhone,
-          productQuantity,
-          productMeasurements
-        }
-      });
-    }
+    //   this.setState({ 
+    //     suggestions: {
+    //       productName,
+    //       productPrice,
+    //       customerName,
+    //       customerPhone,
+    //       productQuantity,
+    //       productMeasurements
+    //     }
+    //   });
+    // }
   }
 
   componentWillUnmount(): void {
@@ -254,186 +258,108 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
-    const { formInputs, suggestions } = this.state;
+    const { formInputs, initialValues } = this.state;
     const { payments: paymentDynamicArray }: any = formInputs;
-    
+    const formKey = Math.random() + "";
     const formFields = this.getFormFields();
     const paymentFields = this.getPaymentFields();
+
+    const { suggestions } = this.props;
 
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2}>Create an Invoice</Title>
-        <Form {...formItemLayout} style={{ margin: '0 20px'}} onFinish={this.submitTheForm}>
-          {Object.keys(formFields).map((key, index) => {
-            const { 
-              label, 
-              placeholder,
-            } = formFields[key];
-
-            const value = formInputs[key] || '';
-            const currentRef = this.inputRefs[index];
-            const currentSuggestion = suggestions[key] || [];
-
-            return (
-              <Item key={`invoice[${key}]`} label={label} name={key} labelAlign={'left'} colon={false} rules={[ { required: true, message: `${label} is required.` } ]}>
-                <AutoComplete
-                  options={currentSuggestion}
-                  onSelect={(value: any) => {
-                    this.setState((prevState) => {
-                        return {
-                          ...prevState,
-                          formInputs: {
-                            ...prevState.formInputs,
-                            [key]: value
-                          }
-                        }
-                      });
-                  }}
-                  onSearch={this.onSearch}>
-                    
-                  <Input 
-                    ref={currentRef}
-                    autoFocus={index === 0}
-                    value={value} 
-                    type={(key === 'productQuantity' || key === 'productPrice') ? 'number' : 'text'}
-                    placeholder={placeholder}
-                    
-                    onKeyUp={(event: any) => {
-                      if (this.focusNextElement(event, index)) return;
-
-                      this.setState((prevState) => {
-                        return {
-                          ...prevState,
-                          formInputs: {
-                            ...prevState.formInputs,
-                            [key]: event.target.value
-                          }
-                        }
-                      });
-                    }} />
-                </AutoComplete>
-              </Item>
-            );
-          })}
-
-          {paymentDynamicArray && paymentDynamicArray.length && paymentDynamicArray.map((fields: any, index: number) => {
-            
-            const paymentsRefArray = this.inputRefs.slice(
-              (this.inputRefs.length - 1) - (paymentDynamicArray.length * 2), 
-              (this.inputRefs.length - 1)
-            );
-
-            const startIdx = index * 2;
-            const currentRefrray = paymentsRefArray.slice(startIdx, paymentsRefArray.length).slice(0, 2);
-
-            return (
-              <Fragment key={`payment-${index}`}>
-                {Object.keys(fields).map((key: any, index2: number) => {
-                  const { label, options, placeholder } = paymentFields[key];
-                  const value = (paymentDynamicArray[index] || {})[key] || '';
-                  
-                  
-                  if (key === 'paymentType') {
-                    if (!options) return null;
-                    return (
-                      <Item key={`paymentType-${index2}`} label={label} colon={false} labelAlign={'left'}>
-                        <Select 
-                          ref={currentRefrray[0]} 
-                          defaultValue={value || options[0]} 
-                          placeholder={placeholder}  
-                          onSelect={(selectedItem: any) => {
-                            this.setState((prevState) => {
-                              const { payments }: any = prevState.formInputs;
-                              payments[index]['paymentType'] = selectedItem;                            
-                              return {
-                                ...prevState,
-                                formInputs: {
-                                  ...prevState.formInputs,
-                                  payments
-                                }
-                              }
-                            });
-                          }}
-                          
-                          onKeyUp={(event) => {
-                            this.focusNextElement(event, this.numberOfFormFields + startIdx)
-                          }}
-                        >
-                            {options.map((option: string, index3: number) => (
-                              <Option 
-                                key={`${option}-${index3}`} 
-                                value={option}
-                              >{option}</Option>
-                            ))}
-                        </Select>
-                      </Item>
-                    )
-                  }
-
-                  return (
-                    <Item key={`amount-${index2}`} label={label} colon={false} labelAlign={'left'}>
-                      <Input 
-                        ref={currentRefrray[1]}
-                        value={value} 
-                        placeholder={placeholder}
-                        type={'number'}
-                        onKeyUp={(event) => {
-                          this.focusNextElement(event, this.numberOfFormFields + startIdx + 1);
-                        }}
-                        onInput={(event: any) => {
-                          this.setState((prevState) => {
-                            const { payments }: any = prevState.formInputs;
-                            payments[index]['amount'] = event.target.value;                            
-                            return {
-                              ...prevState,
-                              formInputs: {
-                                ...prevState.formInputs,
-                                payments
-                              }
-                            }
-                          });
-                        }} />
-                    </Item>
-                  );
-                })}
-              </Fragment>
-            );
-          })}
-
-          <Item label={' '} colon={false}>
-            <Button ref={this.inputRefs[this.inputRefs.length - 1]} type="dashed" block icon={<PlusOutlined />} onClick={() => {
-              this.inputRefs.splice(this.inputRefs.length - 2, 0, createRef(), createRef());
-
-              this.setState(prevState => {
-                let { payments }: any = formInputs;
-                if (!payments) payments = [];
-
-                payments = JSON.parse(JSON.stringify(payments));
-
-                const formObjectFromPayments = Object.keys(paymentFields)
-                  .reduce((prevValue, currentValue) => ({
-                    ...prevValue, 
-                    [currentValue]: (paymentFields[currentValue].options || [])[0] || ''
-                  }), {});
-
-                payments.push(formObjectFromPayments);
-
-                return {
+        <Form key={formKey} ref={this.formRef} initialValues={{
+          customer: {
+            name: (initialValues['customer'] || {})['name'],
+            phone: (initialValues['customer'] || {})['phone'],
+          }
+        }} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
+          
+          <Form.Item required={true} labelAlign={'left'} colon={false} name={['customer', 'phone']} label="Customer Phone" rules={[{ pattern: new RegExp('^((\\+92)|(0))(3)([0-9]{9})$', 'gm'), message: 'Customer Phone is not valid' }]}>
+            <AutoComplete
+              options={(((suggestions as any) || {})['customers'] || []).map((customer: any) => ({ value: `${customer.phone}`, customer }))}
+              filterOption={(inputValue: string, option: any) =>
+                option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+              onSelect={(value: any, option: any) => {
+                const { customer } = option;
+                this.setState(prevState => ({
                   ...prevState,
-                  formInputs: {
-                    ...formInputs,
-                    payments
+                  initialValues: {
+                    customer: {
+                      name: customer.name,
+                      phone: customer.phone
+                    }
                   }
-                }
-              });
-              
-            }}>
-              Add Payment Information
-            </Button>
-          </Item>
+                }))
+              }}
+            >
+                          
+              <Input  />
+            </AutoComplete>
+          </Form.Item>
+
+          <Form.Item  labelAlign={'left'} colon={false} name={['customer', 'name']} label="Customer Name" rules={[{ required: true, message: 'Customer Name is required' }]}>
+            <AutoComplete
+              options={(((suggestions as any) || {})['customers'] || []).map((customer: any) => ({ value: `${customer.name}`, customer: customer }))}
+              filterOption={(inputValue: string, option: any) =>
+                option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+            >
+                          
+              <Input  />
+            </AutoComplete>
+          </Form.Item>
+          
+          
+          <Form.List name="products">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field) => (
+                  <Space key={field.key} align="baseline">
+                    <Form.Item
+                      {...formItemLayout}
+                      shouldUpdate={(prevValues, curValues) =>
+                        prevValues.area !== curValues.area || prevValues.sights !== curValues.sights
+                      }
+                    >
+                      {() => (
+                        <Form.Item
+                          {...field}
+                          label="Sight"
+                          name={[field.name, 'sight']}
+                          rules={[{ required: true, message: 'Missing sight' }]}
+                        >
+                          
+                        </Form.Item>
+                      )}
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      label="Price"
+                      name={[field.name, 'price']}
+                      rules={[{ required: true, message: 'Missing price' }]}
+                    >
+                      <Input />
+                    </Form.Item>
+
+                    <MinusCircleOutlined onClick={() => remove(field.name)} />
+                  </Space>
+                ))}
+
+                <Form.Item label="Add Product" colon={false} labelAlign={'left'}>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add sights
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+          
 
           <Item label={' '} colon={false}>
-            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={Object.keys(formInputs).length < 7} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
+            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={false} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
                 Save
             </Button>
           </Item>

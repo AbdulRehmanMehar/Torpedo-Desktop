@@ -367,7 +367,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
             width: formInputs['width'],
             type: formInputs['type'] || this.defaultTypeForProduct,
             quality: formInputs['quality'] || this.defaultQualityForProduct
-        }} style={{ margin: '0 20px'}} onFinish={this.submitTheForm} onFinishFailed={(errorInfo: any) => console.log({ errorInfo })}>
+        }} style={{ margin: '0 20px'}} onFinish={this.submitTheForm} onFinishFailed={() => toast.error('Please fix errors from the fields')}>
           {Object.keys(formFields).map((key, index) => {
             const { 
               label, 
