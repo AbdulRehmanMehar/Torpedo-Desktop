@@ -276,7 +276,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
           }
         }} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
           
-          <Form.Item required={true} labelAlign={'left'} colon={false} name={['customer', 'phone']} label="Customer Phone" rules={[{ pattern: new RegExp('^((\\+92)|(0))(3)([0-9]{9})$', 'gm'), message: 'Customer Phone is not valid' }]}>
+          <Form.Item required={true} labelAlign={'left'} colon={false} name={['customer', 'phone']} label="Customer Phone" rules={[{ required: true, pattern: new RegExp('^((\\+92)|(0))(3)([0-9]{9})$', 'gm'), message: 'Customer Phone is not valid' }]}>
             <AutoComplete
               options={(((suggestions as any) || {})['customers'] || []).map((customer: any) => ({ value: `${customer.phone}`, customer }))}
               filterOption={(inputValue: string, option: any) =>
@@ -311,52 +311,6 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
               <Input  />
             </AutoComplete>
           </Form.Item>
-          
-          
-          <Form.List name="products">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map((field) => (
-                  <Space key={field.key} align="baseline">
-                    <Form.Item
-                      {...formItemLayout}
-                      shouldUpdate={(prevValues, curValues) =>
-                        prevValues.area !== curValues.area || prevValues.sights !== curValues.sights
-                      }
-                    >
-                      {() => (
-                        <Form.Item
-                          {...field}
-                          label="Sight"
-                          name={[field.name, 'sight']}
-                          rules={[{ required: true, message: 'Missing sight' }]}
-                        >
-                          
-                        </Form.Item>
-                      )}
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      label="Price"
-                      name={[field.name, 'price']}
-                      rules={[{ required: true, message: 'Missing price' }]}
-                    >
-                      <Input />
-                    </Form.Item>
-
-                    <MinusCircleOutlined onClick={() => remove(field.name)} />
-                  </Space>
-                ))}
-
-                <Form.Item label="Add Product" colon={false} labelAlign={'left'}>
-                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                    Add sights
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
-          
 
           <Item label={' '} colon={false}>
             <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={false} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
