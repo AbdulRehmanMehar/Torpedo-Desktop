@@ -2,7 +2,7 @@ import { AutoComplete, Button, Form, FormInstance, Input, InputRef, Layout, Sele
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { MinusOutlined } from '@ant-design/icons';
 
 import {
   PlusOutlined,
@@ -311,6 +311,70 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
               <Input  />
             </AutoComplete>
           </Form.Item>
+
+          <Form.List name="sights">
+        {(fields, { add, remove }) => (
+          <>
+            {fields.map((field, index) => (
+              <>
+                <p style={{ textAlign: 'center' }}>
+                  <b style={{ marginLeft: '150px' }}>Product #{(index + 1)} Information</b>
+                </p> 
+                <Form.Item
+                  {...field}
+                  label="Choose Product"
+                  name={[field.name, 'title']}
+                  colon={false}
+                  labelAlign="left"
+                  rules={[{ required: true, message: 'Select Product' }]}
+                >
+                  <Select
+                    showSearch
+                    options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.title}`, product: product }))}
+                    filterOption={(inputValue: string, option: any) =>
+                      option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                    }
+                    
+                  >
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  {...field}
+                  label="Price"
+                  colon={false}
+                  labelAlign="left"
+                  name={[field.name, 'price']}
+                  style={{ width: 'auto' }}
+                  rules={[{ required: true, message: 'Missing price' }]}
+                >
+                  <AutoComplete
+                    options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.price}`, product: product }))}
+                    filterOption={(inputValue: string, option: any) =>
+                      option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                    }
+                    
+                  >
+                                
+                    <Input />
+                  </AutoComplete>
+                </Form.Item>
+                
+                <Form.Item label=" " colon={false} labelAlign="left">
+                  <Button type="dashed" danger onClick={() => remove(field.name)} block icon={<MinusOutlined/>}>
+                    Remove Product #{(index + 1)}
+                  </Button>
+                </Form.Item>
+              </>
+            ))}
+
+            <Form.Item label="Add Product(s)" colon={false} labelAlign="left">
+              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                Add Product(s)
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
 
           <Item label={' '} colon={false}>
             <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={false} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
