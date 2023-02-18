@@ -256,6 +256,16 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     })
   }
 
+  convertProductsToArray = () => {
+    const array: any[] = [];
+    const { initialValues } = this.state;
+    const mapAble = (initialValues.products || {});
+    Object.keys(mapAble).forEach((key) => {
+      array.splice(parseInt(key), mapAble[key]);
+    })
+    return array;
+  }
+
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
     const { formInputs, initialValues } = this.state;
@@ -266,15 +276,14 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
     const { suggestions } = this.props;
 
+    const products = this.convertProductsToArray();
+    console.log({ products });
+    
+
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2}>Create an Invoice</Title>
-        <Form key={formKey} ref={this.formRef} initialValues={{
-          customer: {
-            name: (initialValues['customer'] || {})['name'],
-            phone: (initialValues['customer'] || {})['phone'],
-          }
-        }} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
+        <Form ref={this.formRef} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
           
           <Form.Item required={true} labelAlign={'left'} colon={false} name={['customer', 'phone']} label="Customer Phone" rules={[{ required: true, pattern: new RegExp('^((\\+92)|(0))(3)([0-9]{9})$', 'gm'), message: 'Customer Phone is not valid' }]}>
             <AutoComplete
@@ -284,15 +293,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
               }
               onSelect={(value: any, option: any) => {
                 const { customer } = option;
-                this.setState(prevState => ({
-                  ...prevState,
-                  initialValues: {
-                    customer: {
-                      name: customer.name,
-                      phone: customer.phone
-                    }
-                  }
-                }))
+                this.formRef.current?.setFieldValue(['customer', 'name'], customer.name)
               }}
             >
                           
@@ -300,7 +301,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
             </AutoComplete>
           </Form.Item>
 
-          <Form.Item  labelAlign={'left'} colon={false} name={['customer', 'name']} label="Customer Name" rules={[{ required: true, message: 'Customer Name is required' }]}>
+          <Form.Item key={formKey} labelAlign={'left'} colon={false} name={['customer', 'name']} label="Customer Name" rules={[{ required: true, message: 'Customer Name is required' }]}>
             <AutoComplete
               options={(((suggestions as any) || {})['customers'] || []).map((customer: any) => ({ value: `${customer.name}`, customer: customer }))}
               filterOption={(inputValue: string, option: any) =>
@@ -316,9 +317,9 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field, index) => (
-                  <>
+                  <Fragment key={field.key}>
                     <p style={{ textAlign: 'center' }}>
-                      <b style={{ marginLeft: '150px' }}>Product #{(index + 1)} Information</b>
+                      <b style={{ marginLeft: '150px' }}>Product #{(index + 1)}</b>
                     </p> 
                     <Form.Item
                       {...field}
@@ -334,13 +335,29 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         filterOption={(inputValue: string, option: any) =>
                           option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                         }
-                        
+                        onSelect={(value: any, options: any) => {
+                          const { product } = options;
+                          const {price: purchasePrice, id} = product;
+                          this.formRef.current?.setFieldValue(['products', index, 'purchasePrice'], purchasePrice)
+                          this.formRef.current?.setFieldValue(['products', index, 'id'], id)
+                        }}
                       >
                       </Select>
                     </Form.Item>
                     <Form.Item
                       {...field}
-                      label="Price"
+                      label="Purchase Price"
+                      colon={false}
+                      labelAlign="left"
+                      name={[field.name, 'purchasePrice']}
+                      style={{ width: 'auto' }}
+                      rules={[{ required: true, message: 'Missing price' }]}
+                    >
+                      <Input readOnly />
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      label="Selling Price"
                       colon={false}
                       labelAlign="left"
                       name={[field.name, 'price']}
@@ -358,13 +375,22 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         <Input />
                       </AutoComplete>
                     </Form.Item>
-                    
+                    <Form.Item
+                      {...field}
+                      label=" "
+                      colon={false}
+                      labelAlign="left"
+                      name={[field.name, 'id']}
+                      style={{ display: 'none' }}
+                    >
+                      <Input readOnly />
+                    </Form.Item>
                     <Form.Item label=" " colon={false} labelAlign="left">
                       <Button type="dashed" danger onClick={() => remove(field.name)} block icon={<MinusOutlined/>}>
                         Remove Product #{(index + 1)}
                       </Button>
                     </Form.Item>
-                  </>
+                  </Fragment>
                 ))}
 
                 <Form.Item label="Add Product(s)" colon={false} labelAlign="left">
