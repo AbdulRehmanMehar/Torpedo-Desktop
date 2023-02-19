@@ -1,4 +1,4 @@
-import { AutoComplete, Button, Form, Input, InputRef, Layout, Select, Space, Typography } from "antd";
+import { AutoComplete, Button, Form, Input, InputRef, Layout, Popconfirm, Select, Space, Typography } from "antd";
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
@@ -321,7 +321,8 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                 if (!products || !products.length) {
                   return Promise.reject(new Error('Please add at least 1 product.'));
                 }
-                const projectIds = products.map((product: any) => (product || {}).id);
+                const projectIds = products.map((product: any) => (product || {}).id).filter((id: string) => !!id);
+                if (!projectIds.length) return Promise.reject(new Error('Please add product(s) information.'));
                 const uniqueProjectIds = [...new Set(projectIds)];
                 if (projectIds.length !== uniqueProjectIds.length) {
                   return Promise.reject(new Error('Duplicate Found! Please ensure that no product is added twice.'));
@@ -370,9 +371,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                             this.formRef.current?.setFieldValue(['products', index, 'unitMeasurements'], null);
                             this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], null);
                           }
-                          if (!quality && (height && width)) {
-                            this.formRef.current?.setFieldValue(['products', index, 'quality'], null);
-                          }
+                          
                           if (choosenQuantity && unitMeasurements) {
                             const netMeasurements = unitMeasurements * parseFloat(choosenQuantity);
                             this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], netMeasurements);
@@ -380,6 +379,9 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                           if (choosenPrice && choosenQuantity) {
                             const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
                             this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                          }
+                          if (!quality) {
+                            this.formRef.current?.setFieldValue(['products', index, 'quality'], null);
                           }
                           // this.setState({ initialValues: {
                           //   [index]: Math.random() + ''
@@ -551,6 +553,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                     <Form.Item noStyle shouldUpdate={(prevValues, curValues) => JSON.stringify(prevValues) !== JSON.stringify(curValues)}>
                       {() => (
                         <>
+                          
                           {this.formRef.current?.getFieldValue(['products', index, 'totalPrice']) ? (
                             <Form.Item
                               {...field}
@@ -590,10 +593,26 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                       <Input disabled />
                     </Form.Item>
                     <Form.Item label=" " colon={false} labelAlign="left">
+                      <Popconfirm
+                        title={`Are you sure you want to remove Product #${index+1}`}
+                        onConfirm={() => {
+                          remove(field.name)
+                          toast.info(`Product #${index+1} is removed.`)
+                        }}
+                        onCancel={() => toast.info(`Operation Canceled.`)}
+                        okText="Yes - Remove it"
+                        cancelText="Cancel - Don't remove"
+                      >
+                        <Button type="dashed" danger block icon={<MinusOutlined/>}>
+                          Remove Product #{(index + 1)}
+                        </Button>
+                      </Popconfirm>
+                    </Form.Item>
+                    {/* <Form.Item label=" " colon={false} labelAlign="left">
                       <Button type="dashed" danger onClick={() => remove(field.name)} block icon={<MinusOutlined/>}>
                         Remove Product #{(index + 1)}
                       </Button>
-                    </Form.Item>
+                    </Form.Item> */}
                   </>
                 ))}
 
@@ -607,6 +626,107 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
               </>
             )}
           </Form.List>
+          
+          <Form.Item noStyle shouldUpdate={(prevValue, curValue) => JSON.stringify(prevValue) !== JSON.stringify(curValue)}>
+            {() => (
+              <>
+                {(this.formRef.current?.getFieldValue('products') || []).length ? (
+                  <Form.List
+                    name="payments"
+                    rules={[
+                      {
+                        validator: async (_, payments) => {
+                          if (!payments || !payments.length) {
+                            return Promise.reject(new Error('Please add at least 1 payment.'));
+                          }
+                          const paymentTypes = payments.map((payment: any) => (payment || {}).paymentType).filter((paymentType: string) => !!paymentType);
+                          if (!paymentTypes.length) return Promise.reject(new Error('Please add payment(s) information.'));
+                          const uniquePaymentTypes = [...new Set(paymentTypes)];
+                          if (paymentTypes.length !== uniquePaymentTypes.length) {
+                            return Promise.reject(new Error('Duplicate Found! Please ensure that no payment type is added twice.'));
+                          }
+                        },
+                      },
+                    ]}
+                  >
+                    {(fields, { add, remove }, { errors }) => (
+                      <>
+                        {fields.map((field, index) => (
+                          <>
+                            <p style={{ textAlign: 'center' }}>
+                              <b style={{ marginLeft: '150px' }}>Payment #{(index + 1)}</b>
+                            </p> 
+                            
+                            <Form.Item
+                              {...field}
+                              required={true}
+                              name={[field.name, 'paymentType']}
+                              label="Payment Type"
+                              colon={false}
+                              labelAlign="left"
+                            >
+                              <Select
+                                showSearch
+                                options={(['Debt', 'Credit', 'Cash']).map((paymentType: any) => ({ value: `${paymentType}` }))}
+                                filterOption={(inputValue: string, option: any) =>
+                                  option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                                }
+                              >
+                              </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                              {...field}
+                              name={[field.name, 'amount']}
+                              label="Amount"
+                              colon={false}
+                              labelAlign="left"
+                              rules={[{ required: true, message: 'Please enter amount.' }]}
+                            >
+                              <Input type="number" />
+                            </Form.Item>
+                            
+                            <Form.Item label=" " colon={false} labelAlign="left">
+                              <Popconfirm
+                                title={`Are you sure you want to remove Payment #${index+1}`}
+                                onConfirm={() => {
+                                  remove(field.name)
+                                  toast.info(`Payment #${index+1} is removed.`)
+                                }}
+                                onCancel={() => toast.info(`Operation Canceled.`)}
+                                okText="Yes - Remove it"
+                                cancelText="Cancel - Don't remove"
+                              >
+                                <Button type="dashed" danger block icon={<MinusOutlined/>}>
+                                  Remove Payment #{(index + 1)}
+                                </Button>
+                              </Popconfirm>
+                              
+
+                            </Form.Item>
+                            
+                          </>
+                        ))}
+                        <Form.Item label="Add Payment(s)" labelAlign="left" colon={false}>
+                          <Button
+                            type="dashed"
+                            onClick={() => add()}
+                            style={{ width: '100%' }}
+                            icon={<PlusOutlined />}
+                          >
+                            Add Payment(s)
+                          </Button>
+                          <Form.ErrorList errors={errors} />
+                        </Form.Item>
+                      </>
+                    )}
+                  </Form.List>
+                ): null}
+              </>
+            )}
+          </Form.Item>
+
+          
 
           <Item label={' '} colon={false}>
             <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={false} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
