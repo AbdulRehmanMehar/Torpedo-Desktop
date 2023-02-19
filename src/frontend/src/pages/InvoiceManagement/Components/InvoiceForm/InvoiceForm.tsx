@@ -313,8 +313,21 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
             </AutoComplete>
           </Form.Item>
 
-          <Form.List name="products">
-            {(fields, { add, remove }) => (
+          <Form.List name="products" rules={[
+            {
+              validator: async (_, products) => {
+                if (!products || !products.length) {
+                  return Promise.reject(new Error('Please add at least 1 product.'));
+                }
+                const projectIds = products.map((product: any) => (product || {}).id);
+                const uniqueProjectIds = [...new Set(projectIds)];
+                if (projectIds.length !== uniqueProjectIds.length) {
+                  return Promise.reject(new Error('Duplicate Found! Please ensure that no product is added twice.'));
+                }
+              },
+            },
+          ]}>
+            {(fields, { add, remove }, { errors }) => (
               <>
                 {fields.map((field, index) => (
                   <Fragment key={field.key}>
@@ -362,7 +375,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                       labelAlign="left"
                       name={[field.name, 'price']}
                       style={{ width: 'auto' }}
-                      rules={[{ required: true, message: 'Missing price' }]}
+                      rules={[{ required: true, message: 'Please enter the selling price' }]}
                     >
                       <AutoComplete
                         options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.price}`, product: product }))}
@@ -372,7 +385,27 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         
                       >
                                     
-                        <Input />
+                        <Input type="number" />
+                      </AutoComplete>
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      label="Selling Quantity"
+                      colon={false}
+                      labelAlign="left"
+                      name={[field.name, 'quantity']}
+                      style={{ width: 'auto' }}
+                      rules={[{ required: true, message: 'Please enter quantity to be sold' }]}
+                    >
+                      <AutoComplete
+                        options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.quantity}`, product: product }))}
+                        filterOption={(inputValue: string, option: any) =>
+                          option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                        }
+                        
+                      >
+                                    
+                        <Input type="number" />
                       </AutoComplete>
                     </Form.Item>
                     <Form.Item
@@ -393,10 +426,12 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                   </Fragment>
                 ))}
 
+
                 <Form.Item label="Add Product(s)" colon={false} labelAlign="left">
                   <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                     Add Product(s)
                   </Button>
+                  <Form.ErrorList errors={errors} />
                 </Form.Item>
               </>
             )}
