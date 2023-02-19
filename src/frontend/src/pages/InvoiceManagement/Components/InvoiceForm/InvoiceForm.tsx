@@ -594,7 +594,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                     </Form.Item>
                     <Form.Item label=" " colon={false} labelAlign="left">
                       <Popconfirm
-                        title={`Are you sure you want to remove Product #${index+1}`}
+                        title={`Are you sure to remove Product #${index+1}`}
                         onConfirm={() => {
                           remove(field.name)
                           toast.info(`Product #${index+1} is removed.`)
@@ -688,7 +688,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                             
                             <Form.Item label=" " colon={false} labelAlign="left">
                               <Popconfirm
-                                title={`Are you sure you want to remove Payment #${index+1}`}
+                                title={`Are you sure to remove Payment #${index+1}`}
                                 onConfirm={() => {
                                   remove(field.name)
                                   toast.info(`Payment #${index+1} is removed.`)
