@@ -83,6 +83,11 @@ export interface InvoiceSuggestions {
     id: string;
     price: number;
     title: string;
+    quality?: string;
+    quantity: number;
+    type: string;
+    height?: string;
+    width?: string;
   }>;
   customers: Array<{
     id: string;
