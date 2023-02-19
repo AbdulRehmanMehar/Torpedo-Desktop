@@ -170,7 +170,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
     document.removeEventListener('keyup', this.listenForKeyPress);
   }
 
-  getFormFields = (): Record<any, FormFields & { readOnly?: boolean, type?: 'select' | 'number' | 'text', optional?: boolean, rules?: any[] }> => {
+  getFormFields = (): Record<any, FormFields & { readOnly?: boolean, type?: 'select' | 'number' | 'text', optional?: boolean, rules?: any[], addonAfter?: string }> => {
     const { formInputs } = this.state;
     return {
       brand: {
@@ -191,6 +191,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
         suggestions: [],
         type: 'number',
         value: formInputs['price'] || '',
+        addonAfter: 'PKR',
       },
       quantity: {
         label: 'Quantity',
@@ -208,6 +209,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
           optional: true,
           rules: [],
           readOnly: true,
+          addonAfter: 'PKR'
         }
       } : {}),
       type: {
@@ -242,6 +244,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
             optional: true,
             rules: [],
             readOnly: true,
+            addonAfter: 'meters'
           }
         } : {}),
         ...(!!this.state.formInputs.height && !!this.state.formInputs.width && !!this.state.formInputs.quantity ? {
@@ -253,6 +256,7 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
             optional: true,
             rules: [],
             readOnly: true,
+            addonAfter: 'meters'
           }
         } : {})
       } : {
@@ -377,7 +381,8 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
               value: defaultValue,
               optional,
               rules,
-              readOnly
+              readOnly,
+              addonAfter,
             } = formFields[key];
 
             const value = formInputs[key] || '';
@@ -402,9 +407,9 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
                       });
                     }}
                     
-                    onKeyUp={(event) => {
-                      this.focusNextElement(event, index)
-                    }}
+                    // onKeyUp={(event) => {
+                    //   this.focusNextElement(event, index)
+                    // }}
                   >
                     {options?.map((option: string, index3: number) => (
                       <Option 
@@ -422,10 +427,10 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
                           autoFocus={index === 0}
                           value={`${defaultValue}`}
                           type={'text'}
-                          readOnly={true}
+                          disabled={true}
                           onKeyUp={(event: any) => {
-                            if (this.focusNextElement(event, index)) return;
-                          }} />
+                            // if (this.focusNextElement(event, index)) return;
+                          }} addonAfter={addonAfter} />
                       </>
                     ) : (
                       <AutoComplete
@@ -452,8 +457,9 @@ export default class ProductForm extends Component<ProductFormProps, ProductForm
                           value={value}
                           type={type || 'text'}
                           placeholder={placeholder}
+                          addonAfter={addonAfter}
                           onKeyUp={(event: any) => {
-                            if (this.focusNextElement(event, index)) return;
+                            // if (this.focusNextElement(event, index)) return;
 
                             this.setState((prevState) => {
                               return {
