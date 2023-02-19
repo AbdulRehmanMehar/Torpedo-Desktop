@@ -1,4 +1,4 @@
-import { AutoComplete, Button, Form, FormInstance, Input, InputRef, Layout, Select, Space, Typography } from "antd";
+import { AutoComplete, Button, Form, Input, InputRef, Layout, Select, Space, Typography } from "antd";
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
@@ -12,6 +12,8 @@ import ReactDOM from "react-dom";
 import { Invoice } from "../../Helpers/types";
 import { addInvoice } from "../../Store/Actions";
 import { InvoiceSuggestions } from "../../../../config/types";
+import { FormProps } from "../../../../hoc/AntForm";
+import { FormInstance } from "antd/lib/form/Form";
 
 
 const { Item } = Form;
@@ -35,6 +37,7 @@ interface InvoiceFormProps {
   suggestions: InvoiceSuggestions;
   getInvoices: Function;
   addInvoice: Function;
+  formProps: FormProps;
 }
 
 interface InvoiceFormState {
@@ -238,7 +241,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     const netPayable = (formInputs.productQuantity || 0) * (formInputs.productPrice || 0);
     const { payments } = formInputs;
     const paymentAmounts = payments.map((payment: any) => payment.amount);
-    const netPaid = paymentAmounts.reduce((last: number, current:number) => last + parseInt('' + current), 0);
+    const netPaid = paymentAmounts.reduce((last: number, current:number) => last + parseFloat('' + current), 0);
 
     if (netPaid !== netPayable) return toast(`Net Payable amount is ${netPayable} but Total Paid is ${netPaid}. Please fix it.`);
 
@@ -261,7 +264,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     const { initialValues } = this.state;
     const mapAble = (initialValues.products || {});
     Object.keys(mapAble).forEach((key) => {
-      array.splice(parseInt(key), mapAble[key]);
+      array.splice(parseFloat(key), mapAble[key]);
     })
     return array;
   }
@@ -274,16 +277,15 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     const formFields = this.getFormFields();
     const paymentFields = this.getPaymentFields();
 
-    const { suggestions } = this.props;
+    const { suggestions, formProps } = this.props;
 
     const products = this.convertProductsToArray();
-    console.log({ products });
-    
+    console.log({ formProps });
 
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2}>Create an Invoice</Title>
-        <Form ref={this.formRef} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
+        <Form ref={this.formRef} initialValues={{ products: [undefined] }} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
           
           <Form.Item required={true} labelAlign={'left'} colon={false} name={['customer', 'phone']} label="Customer Phone" rules={[{ required: true, pattern: new RegExp('^((\\+92)|(0))(3)([0-9]{9})$', 'gm'), message: 'Customer Phone is not valid' }]}>
             <AutoComplete
@@ -329,13 +331,14 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
           ]}>
             {(fields, { add, remove }, { errors }) => (
               <>
-                {fields.map((field, index) => (
-                  <Fragment key={field.key}>
+                {fields.map(({ key, ...field }, index) => (
+                  <>
                     <p style={{ textAlign: 'center' }}>
                       <b style={{ marginLeft: '150px' }}>Product #{(index + 1)}</b>
                     </p> 
                     <Form.Item
                       {...field}
+                      // dependencies={}
                       label="Choose Product"
                       name={[field.name, 'title']}
                       colon={false}
@@ -350,23 +353,108 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         }
                         onSelect={(value: any, options: any) => {
                           const { product } = options;
-                          const {price: purchasePrice, id} = product;
-                          this.formRef.current?.setFieldValue(['products', index, 'purchasePrice'], purchasePrice)
-                          this.formRef.current?.setFieldValue(['products', index, 'id'], id)
+                          const {price: purchasePrice, height, width, quality, id} = product;
+                          let unitMeasurements = undefined;
+                          const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
+                          const choosenPrice = this.formRef.current?.getFieldValue(['products', index, 'price']);
+                          this.formRef.current?.setFieldValue(['products', index, 'purchasePrice'], purchasePrice);
+                          this.formRef.current?.setFieldValue(['products', index, 'id'], id);
+                          this.formRef.current?.setFieldValue(['products', index, 'width'], width);
+                          this.formRef.current?.setFieldValue(['products', index, 'height'], height);
+                          this.formRef.current?.setFieldValue(['products', index, 'quality'], quality);
+                          if (height && width) {
+                            unitMeasurements = (parseFloat(height) * parseFloat(width)) / 1600;
+                            this.formRef.current?.setFieldValue(['products', index, 'unitMeasurements'], unitMeasurements);
+                          }
+                          if (quality && (!height || !width)) {
+                            this.formRef.current?.setFieldValue(['products', index, 'unitMeasurements'], null);
+                            this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], null);
+                          }
+                          if (!quality && (height && width)) {
+                            this.formRef.current?.setFieldValue(['products', index, 'quality'], null);
+                          }
+                          if (choosenQuantity && unitMeasurements) {
+                            const netMeasurements = unitMeasurements * parseFloat(choosenQuantity);
+                            this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], netMeasurements);
+                          }
+                          if (choosenPrice && choosenQuantity) {
+                            const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                            this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                          }
+                          // this.setState({ initialValues: {
+                          //   [index]: Math.random() + ''
+                          // } }) // no use, just to perfrom re-render
                         }}
                       >
                       </Select>
                     </Form.Item>
-                    <Form.Item
-                      {...field}
-                      label="Purchase Price"
-                      colon={false}
-                      labelAlign="left"
-                      name={[field.name, 'purchasePrice']}
-                      style={{ width: 'auto' }}
-                      rules={[{ required: true, message: 'Missing price' }]}
-                    >
-                      <Input readOnly />
+                    <Form.Item noStyle shouldUpdate={(prevValues, curValues) => {                      
+                      return JSON.stringify(prevValues) !== JSON.stringify(curValues)
+                    }}>
+                      {() => (
+                        <>
+                          {this.formRef.current?.getFieldValue(['products', index, 'purchasePrice']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Purchase Price"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'purchasePrice']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled addonAfter="PKR" />
+                            </Form.Item>
+                          ) : null}
+                          {this.formRef.current?.getFieldValue(['products', index, 'width']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Width"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'width']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled />
+                            </Form.Item>
+                          ) : null}
+                          {this.formRef.current?.getFieldValue(['products', index, 'height']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Height"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'height']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled />
+                            </Form.Item>
+                          ) : null}
+                          {this.formRef.current?.getFieldValue(['products', index, 'quality']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Quality"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'quality']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled />
+                            </Form.Item>
+                          ) : null}
+                          {this.formRef.current?.getFieldValue(['products', index, 'unitMeasurements']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Unit Measurements"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'unitMeasurements']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled addonAfter='meters' />
+                            </Form.Item>
+                          ) : null}
+                        </>
+                      )}
                     </Form.Item>
                     <Form.Item
                       {...field}
@@ -381,11 +469,32 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.price}`, product: product }))}
                         filterOption={(inputValue: string, option: any) =>
                           option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                        }
-                        
-                      >
-                                    
-                        <Input type="number" />
+                        } 
+                        onSelect={(value: string) => {
+                          const choosenPrice = value;
+                          const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
+                          if (choosenPrice && choosenQuantity) {
+                            const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                            this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                            // this.setState({ initialValues: {
+                            //   [index]: Math.random() + ''
+                            // } })
+                          }
+                        }}
+                      >  
+                        <Input type="number" 
+                          onChange={(event) => {
+                            const choosenPrice = event.target.value;
+                            const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
+                            if (choosenPrice && choosenQuantity) {
+                              const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                              this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                              this.setState({ initialValues: {
+                                [index]: Math.random() + ''
+                              } })
+                            }
+                          }}
+                        />
                       </AutoComplete>
                     </Form.Item>
                     <Form.Item
@@ -402,28 +511,90 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         filterOption={(inputValue: string, option: any) =>
                           option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                         }
-                        
+                        onSelect={(value: any) => {
+                          const choosenPrice = this.formRef.current?.getFieldValue(['products', index, 'price']);
+                          const unitMeasurements = this.formRef.current?.getFieldValue(['products', index, 'unitMeasurements']);
+                          const choosenQuantity = value;
+                          if (choosenPrice && choosenQuantity) {
+                            const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                            this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                          }
+
+                          if (unitMeasurements && choosenQuantity) {
+                            const netMeasurements = parseFloat(unitMeasurements) * parseFloat(choosenQuantity);
+                            this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], netMeasurements);
+                          }
+
+                        }}
                       >
                                     
-                        <Input type="number" />
+                        <Input 
+                          type="number"
+                          onChange={(event) => {
+                            const choosenPrice = this.formRef.current?.getFieldValue(['products', index, 'price']);
+                            const choosenQuantity = event.target.value;
+                            const unitMeasurements = this.formRef.current?.getFieldValue(['products', index, 'unitMeasurements']);
+                            if (choosenPrice && choosenQuantity) {
+                              const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                              this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                              
+                            }
+                            if (unitMeasurements && choosenQuantity) {
+                              const netMeasurements = parseFloat(unitMeasurements) * parseFloat(choosenQuantity);
+                              this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], netMeasurements);
+                            }
+                          }}
+                        />
                       </AutoComplete>
                     </Form.Item>
+                    
+                    <Form.Item noStyle shouldUpdate={(prevValues, curValues) => JSON.stringify(prevValues) !== JSON.stringify(curValues)}>
+                      {() => (
+                        <>
+                          {this.formRef.current?.getFieldValue(['products', index, 'totalPrice']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Total Price"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'totalPrice']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled addonAfter={'PKR'} />
+                            </Form.Item>
+                          ) : null}
+                          {this.formRef.current?.getFieldValue(['products', index, 'netMeasurements']) ? (
+                            <Form.Item
+                              {...field}
+                              label="Total Measurements"
+                              colon={false}
+                              labelAlign="left"
+                              name={[field.name, 'netMeasurements']}
+                              style={{ width: 'auto' }}
+                            >
+                              <Input disabled addonAfter={'meters'} />
+                            </Form.Item>
+                          ) : null}
+                        </>
+                      )}
+                    </Form.Item>
+                    
                     <Form.Item
                       {...field}
                       label=" "
                       colon={false}
                       labelAlign="left"
                       name={[field.name, 'id']}
-                      style={{ display: 'none' }}
+                      hidden
                     >
-                      <Input readOnly />
+                      <Input disabled />
                     </Form.Item>
                     <Form.Item label=" " colon={false} labelAlign="left">
                       <Button type="dashed" danger onClick={() => remove(field.name)} block icon={<MinusOutlined/>}>
                         Remove Product #{(index + 1)}
                       </Button>
                     </Form.Item>
-                  </Fragment>
+                  </>
                 ))}
 
 
