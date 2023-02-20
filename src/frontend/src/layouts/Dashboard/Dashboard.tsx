@@ -43,6 +43,7 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
     const { getSuggestions } = this.props;
     this.setState({ isLoading: true });
     getSuggestions({
+      onError: () => toast.error('Failed to load suggestions. Please relaod the application and ensure internet is connected.'),
       onComplete: () => this.setState({ isLoading: false })
     });
   }
