@@ -1,4 +1,4 @@
-import { AutoComplete, Button, Form, Input, InputRef, Layout, Popconfirm, Select, Space, Typography } from "antd";
+import { AutoComplete, Button, Form, Input, InputRef, Layout, Popconfirm, Select, Space, Spin, Typography } from "antd";
 import { Component, createRef, forwardRef, Fragment, SyntheticEvent, ReactNode, Ref, RefObject } from "react";
 import { NavigationProps } from "../../../../hoc/Navigation";
 import { toast } from 'react-toastify';
@@ -35,7 +35,7 @@ interface FormFields {
 interface InvoiceFormProps {
   navigationProps: NavigationProps;
   suggestions: InvoiceSuggestions;
-  getInvoices: Function;
+  // getInvoices: Function;
   addInvoice: Function;
   formProps: FormProps;
 }
@@ -44,6 +44,7 @@ interface InvoiceFormState {
   options: any[];
   formInputs: Record<any, any>;
   initialValues: any;
+  isProcessing: boolean;
 }
 
 const formItemLayout = {
@@ -66,7 +67,8 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     this.state = {
       options: [],
       formInputs: {},
-      initialValues: {}
+      initialValues: {},
+      isProcessing: false,
     };
 
     this.numberOfFormFields = Object.keys(this.getFormFields()).length;
@@ -79,9 +81,6 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
   }
 
   componentDidMount(): void {
-    const { getInvoices } = this.props;
-    getInvoices();
-
     document.addEventListener('keyup', this.listenForKeyPress);
   }
 
@@ -103,46 +102,46 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     // if (firstInputEl.current) firstInputEl.current.focus();
   }
 
-  componentDidUpdate(prevProps: Readonly<InvoiceFormProps>, prevState: Readonly<InvoiceFormState>): void { 
-    const { payments } = this.state.formInputs;
-    const { payments: paymentsOld } = prevState.formInputs;
+  // componentDidUpdate(prevProps: Readonly<InvoiceFormProps>, prevState: Readonly<InvoiceFormState>): void { 
+  //   const { payments } = this.state.formInputs;
+  //   const { payments: paymentsOld } = prevState.formInputs;
 
-    if (payments && payments.length && (!paymentsOld || paymentsOld.length !== payments.length)) {
-      const index = this.inputRefs.length - 4;
-      const currentRefEl = this.inputRefs[index];
-      let loopItr = 1;
-      let nextRef = this.inputRefs[index + loopItr];
-      while (nextRef && !nextRef.current && this.inputRefs.length > (index + loopItr)){
-        nextRef = this.inputRefs[index + loopItr];
-        loopItr++;
-      }
+  //   if (payments && payments.length && (!paymentsOld || paymentsOld.length !== payments.length)) {
+  //     const index = this.inputRefs.length - 4;
+  //     const currentRefEl = this.inputRefs[index];
+  //     let loopItr = 1;
+  //     let nextRef = this.inputRefs[index + loopItr];
+  //     while (nextRef && !nextRef.current && this.inputRefs.length > (index + loopItr)){
+  //       nextRef = this.inputRefs[index + loopItr];
+  //       loopItr++;
+  //     }
       
-      currentRefEl.current && currentRefEl.current.focus(); // focus on recently added fields
-    }
+  //     currentRefEl.current && currentRefEl.current.focus(); // focus on recently added fields
+  //   }
 
-    // const { invoices } = this.props;
-    // const { invoices: oldInvoices } = prevProps;
+  //   // const { invoices } = this.props;
+  //   // const { invoices: oldInvoices } = prevProps;
 
-    // if (JSON.stringify(invoices) !== JSON.stringify(oldInvoices)) {
-    //   const productName = Array.from(new Set(invoices.map(invoice => `${invoice.productName}`))).map(value => ({ value }));
-    //   const productPrice = Array.from(new Set(invoices.map(invoice => `${invoice.productPrice}`))).map(value => ({ value }));
-    //   const customerName = Array.from(new Set(invoices.map(invoice => `${invoice.customerName}`))).map(value => ({ value }));
-    //   const customerPhone = Array.from(new Set(invoices.map(invoice => `${invoice.customerPhone}`))).map(value => ({value }));
-    //   const productQuantity = Array.from(new Set(invoices.map(invoice => `${invoice.productQuantity}`))).map(value => ({ value }));
-    //   const productMeasurements = Array.from(new Set(invoices.map(invoice => `${invoice.productMeasurements}`))).map(value => ({ value }));
+  //   // if (JSON.stringify(invoices) !== JSON.stringify(oldInvoices)) {
+  //   //   const productName = Array.from(new Set(invoices.map(invoice => `${invoice.productName}`))).map(value => ({ value }));
+  //   //   const productPrice = Array.from(new Set(invoices.map(invoice => `${invoice.productPrice}`))).map(value => ({ value }));
+  //   //   const customerName = Array.from(new Set(invoices.map(invoice => `${invoice.customerName}`))).map(value => ({ value }));
+  //   //   const customerPhone = Array.from(new Set(invoices.map(invoice => `${invoice.customerPhone}`))).map(value => ({value }));
+  //   //   const productQuantity = Array.from(new Set(invoices.map(invoice => `${invoice.productQuantity}`))).map(value => ({ value }));
+  //   //   const productMeasurements = Array.from(new Set(invoices.map(invoice => `${invoice.productMeasurements}`))).map(value => ({ value }));
 
-    //   this.setState({ 
-    //     suggestions: {
-    //       productName,
-    //       productPrice,
-    //       customerName,
-    //       customerPhone,
-    //       productQuantity,
-    //       productMeasurements
-    //     }
-    //   });
-    // }
-  }
+  //   //   this.setState({ 
+  //   //     suggestions: {
+  //   //       productName,
+  //   //       productPrice,
+  //   //       customerName,
+  //   //       customerPhone,
+  //   //       productQuantity,
+  //   //       productMeasurements
+  //   //     }
+  //   //   });
+  //   // }
+  // }
 
   componentWillUnmount(): void {
     document.removeEventListener('keyup', this.listenForKeyPress);
@@ -231,31 +230,21 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
   }
 
 
-  submitTheForm = () => {
-    const { formInputs } = this.state;
+  submitTheForm = (values: any) => {
     const { addInvoice, navigationProps } = this.props;
     const { navigate } = navigationProps;
-
-    if (Object.keys(formInputs).length < 7) return toast('Please add payment information'); 
-
-    const netPayable = (formInputs.productQuantity || 0) * (formInputs.productPrice || 0);
-    const { payments } = formInputs;
-    const paymentAmounts = payments.map((payment: any) => payment.amount);
-    const netPaid = paymentAmounts.reduce((last: number, current:number) => last + parseFloat('' + current), 0);
-
-    if (netPaid !== netPayable) return toast(`Net Payable amount is ${netPayable} but Total Paid is ${netPaid}. Please fix it.`);
-
+    this.setState({ isProcessing: true });
 
     addInvoice({
-      data: {...formInputs},
+      data: {...values},
       onSuccess: () => {
-        toast('The invoice has been added');
-        navigate('/');
+        toast.success('The invoice has been added');
+        navigate('/list-invoices');
       }, 
-      onError: () => {
-        toast('Something went wrong while adding...');
-        navigate('/');
-      }
+      onError: (message: string) => {
+        toast.error(message || 'Something went wrong while adding...');
+      },
+      onComplete: () => this.setState({ isProcessing: false })
     })
   }
 
@@ -271,7 +260,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   render(): ReactNode {
-    const { formInputs, initialValues } = this.state;
+    const { formInputs, initialValues, isProcessing } = this.state;
     const { payments: paymentDynamicArray }: any = formInputs;
     const formKey = Math.random() + "";
     const formFields = this.getFormFields();
@@ -283,7 +272,10 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
         <Title level={2}>Create an Invoice</Title>
-        <Form ref={this.formRef} initialValues={{ products: [undefined] }} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')} onFinish={(values) => console.log(values, 'finish')}>
+        <Form onFinish={(values) => {
+          console.log('finsish', values);
+          this.submitTheForm(values)
+        }} ref={this.formRef} initialValues={{ products: [undefined] }} {...formItemLayout} style={{ margin: '0 20px'}} onFinishFailed={() => toast.error('Please fix errors from the fields')}>
           
           <Form.Item required={true} labelAlign={'left'} colon={false} name={['customer', 'phone']} label="Customer Phone" rules={[{ required: true, pattern: new RegExp('^((\\+92)|(0))(3)([0-9]{9})$', 'gm'), message: 'Customer Phone is not valid' }]}>
             <AutoComplete
@@ -315,16 +307,20 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
           <Form.List name="products" rules={[
             {
-              validator: async (_, products) => {
-                if (!products || !products.length) {
-                  return Promise.reject(new Error('Please add at least 1 product.'));
-                }
-                const projectIds = products.map((product: any) => (product || {}).id).filter((id: string) => !!id);
-                if (!projectIds.length) return Promise.reject(new Error('Please add product(s) information.'));
-                const uniqueProjectIds = [...new Set(projectIds)];
-                if (projectIds.length !== uniqueProjectIds.length) {
-                  return Promise.reject(new Error('Duplicate Found! Please ensure that no product is added twice.'));
-                }
+              validator: async (rules, value) => {
+                const products = value;
+                
+                  if (!products || !products.length) {
+                    return Promise.reject('Please add at least 1 product.');
+                  }
+                  const projectIds = products.map((product: any) => (product || {}).id).filter((id: string) => !!id);
+                  if (!projectIds.length) return Promise.reject('Please add product(s) information.');
+                  const uniqueProjectIds = [...new Set(projectIds)];
+                  if (projectIds.length !== uniqueProjectIds.length) {
+                    return Promise.reject('Duplicate Found! Please ensure that no product is added twice.');
+                  }
+                
+                return Promise.resolve();
               },
             },
           ]}>
@@ -487,13 +483,12 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                             labelAlign="left"
                             name={[field.name, 'price']}
                             style={{ width: 'auto' }}
-                            rules={[{ validator: (rule, value, callback) => {
-                              try {
-                                if (!value) throw new Error('Price is required.');
-                                if (value < minValue) throw new Error (`Price cannot be less than ${minValue}.`);
-                              } catch (err: any) {
-                                callback(err)
-                              }
+                            rules={[{ validator: async (rule, value) => {
+                              
+                              if (!value) return Promise.reject('Price is required.');
+                              if (value < minValue) return Promise.reject(`Price cannot be less than ${minValue}.`);
+                              
+                              return Promise.resolve()
                             }}]}
                           >
                             <AutoComplete
@@ -542,13 +537,12 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                       labelAlign="left"
                       name={[field.name, 'quantity']}
                       style={{ width: 'auto' }}
-                      rules={[{ validator(rule, value, callback) {
-                        try {
-                          if (!value) throw new Error('Quantity is required.');
-                          if (value < 1) throw new Error ('Quantity cannot be less than 1.');
-                        } catch (err: any) {
-                          callback(err)
-                        }
+                      rules={[{ validator: async(rule, value) => {
+                        
+                          if (!value) return Promise.reject('Quantity is required.');
+                          if (value < 1) return Promise.reject ('Quantity cannot be less than 1.');
+                        
+                        return Promise.resolve()
                       }}]}
                     >
                       <AutoComplete
@@ -674,38 +668,37 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                     name="payments"
                     rules={[
                       {
-                        validator: (_, payments, callback) => {
-                          try {
+                        validator: async (rules, value) => {
+                          const payments = value;
+                          
                             const products = this.formRef.current?.getFieldValue('products');
 
                             const totalPriceFromProductsArray = products.map((product: any) => product.totalPrice).filter((price: any) => !!price).map((price: any) => parseFloat(price));
                             if (products.length !== totalPriceFromProductsArray.length) {
-                              throw (new Error('Please fill in the product data before adding payment information'));
+                              return Promise.reject('Please fill in the product data before adding payment information');
                             }
 
                             if (!payments || !payments.length) {
-                              throw (new Error('Please add at least 1 payment.'));
+                              return Promise.reject('Please add at least 1 payment.');
                             }
                             const paymentTypes = payments.map((payment: any) => (payment || {}).paymentType).filter((paymentType: string) => !!paymentType);
-                            if (!paymentTypes.length) throw (new Error('Please add payment(s) information.'));                        
+                            if (!paymentTypes.length) return Promise.reject('Please add payment(s) information.');                        
 
                             const uniquePaymentTypes = [...new Set(paymentTypes)];
                             if (paymentTypes.length !== uniquePaymentTypes.length) {
-                              throw (new Error('Duplicate Found! Please ensure that no payment type is added twice.'));
+                              return Promise.reject('Duplicate Found! Please ensure that no payment type is added twice.');
                             }
 
                             const totalAmountFromPaymentsArray = payments.filter((payment:any) => !!payment && !!(payment || {}).amount).map((payment: any) => payment.amount).filter((amount: any) => !!amount).map((amount: any) => parseFloat(amount));
                             const totalAmount = (totalAmountFromPaymentsArray || []).reduce((prev: number, current: number) => prev + current, 0);
                             const totalPrice = (totalPriceFromProductsArray || []).reduce((prev: number, current: number) => prev + current, 0);
                             if (totalAmount > totalPrice) {
-                              throw (new Error('The total amount recieved is greater than payable amount.'));
+                              return Promise.reject('The total amount recieved is greater than payable amount.');
                             }
                             if (totalAmount < totalPrice) {
-                              throw (new Error('The total amount recieved is less than payable amount.'));
+                              return Promise.reject('The total amount recieved is less than payable amount.');
                             }
-                          } catch (err: any) {
-                            callback(err);
-                          }
+                          return Promise.resolve() 
                         },
                       },
                     ]}
@@ -744,13 +737,11 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                               colon={false}
                               labelAlign="left"
                               rules={[
-                                { validator: (rule, value, callback) => {
-                                  try {
-                                    if (!value) throw new Error('Amount is required.');
-                                    if (value < 1) throw new Error('Amount cannot be less than 1.');
-                                  } catch (err: any) {
-                                    callback(err);
-                                  }
+                                { validator: async (rule, value) => {
+                                  
+                                  if (!value) return Promise.reject('Amount is required.');
+                                  if (value < 1) return Promise.reject('Amount cannot be less than 1.');
+                                  return Promise.resolve()
                                 }, },
                               ]}
                             >
@@ -800,8 +791,8 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
           
 
           <Item label={' '} colon={false}>
-            <Button title={Object.keys(formInputs).length < 8 ? 'Fill in all the fields and add payment info as well' : ''} disabled={false} ref={this.submitButtonRef} htmlType="submit" type="primary" block icon={<SaveOutlined />}>
-                Save
+            <Button disabled={isProcessing} htmlType="submit" type="primary" block icon={isProcessing ? <Spin /> : <SaveOutlined />}>
+              {isProcessing ? '' : 'Save'}
             </Button>
           </Item>
         </Form>
