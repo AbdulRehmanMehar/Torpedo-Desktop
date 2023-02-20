@@ -384,6 +384,12 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                           if (!quality) {
                             this.formRef.current?.setFieldValue(['products', index, 'quality'], null);
                           }
+
+                          if (choosenPrice && purchasePrice) {
+                            this.formRef.current?.resetFields([['products', index, 'price']]);
+                            this.formRef.current?.setFieldValue(['products', index, 'price'], choosenPrice);
+                            this.formRef.current?.validateFields([['products', index, 'price']]);
+                          }
                           // this.setState({ initialValues: {
                           //   [index]: Math.random() + ''
                           // } }) // no use, just to perfrom re-render
@@ -456,51 +462,80 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                               <Input disabled addonAfter='meters' />
                             </Form.Item>
                           ) : null}
+                          <Form.Item
+                            {...field}
+                            label=" "
+                            colon={false}
+                            labelAlign="left"
+                            name={[field.name, 'id']}
+                            hidden
+                          >
+                            <Input disabled />
+                          </Form.Item>
                         </>
                       )}
                     </Form.Item>
-                    <Form.Item
-                      {...field}
-                      label="Selling Price"
-                      colon={false}
-                      labelAlign="left"
-                      name={[field.name, 'price']}
-                      style={{ width: 'auto' }}
-                      rules={[{ required: true, message: 'Please enter the selling price' }]}
-                    >
-                      <AutoComplete
-                        options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.price}`, product: product }))}
-                        filterOption={(inputValue: string, option: any) =>
-                          option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                        } 
-                        onSelect={(value: string) => {
-                          const choosenPrice = value;
-                          const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
-                          if (choosenPrice && choosenQuantity) {
-                            const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
-                            this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
-                            // this.setState({ initialValues: {
-                            //   [index]: Math.random() + ''
-                            // } })
-                          }
-                        }}
-                      >  
-                        <Input type="number" 
-                          placeholder="2599"
-                          addonAfter={'PKR'}
-                          onChange={(event) => {
-                            const choosenPrice = event.target.value;
-                            const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
-                            if (choosenPrice && choosenQuantity) {
-                              const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
-                              this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
-                              this.setState({ initialValues: {
-                                [index]: Math.random() + ''
-                              } })
-                            }
-                          }}
-                        />
-                      </AutoComplete>
+                    <Form.Item noStyle shouldUpdate={(prevValues, curValues) => {                
+                      return JSON.stringify(prevValues) !== JSON.stringify(curValues);
+                    }}>                           
+                      {() => { 
+                        const minValue = this.formRef.current?.getFieldValue(['products', index, 'purchasePrice']) || 1;
+                        return (
+                          <Form.Item
+                            dependencies={[ ['products', index, 'purchasePrice'] ]}
+                            {...field}
+                            label="Selling Price"
+                            colon={false}
+                            labelAlign="left"
+                            name={[field.name, 'price']}
+                            style={{ width: 'auto' }}
+                            rules={[{ validator: (rule, value, callback) => {
+                              try {
+                                if (!value) throw new Error('Price is required.');
+                                if (value < minValue) throw new Error (`Price cannot be less than ${minValue}.`);
+                              } catch (err: any) {
+                                callback(err)
+                              }
+                            }}]}
+                          >
+                            <AutoComplete
+                              options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.price}`, product: product }))}
+                              filterOption={(inputValue: string, option: any) =>
+                                option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                              } 
+                              onSelect={(value: string) => {
+                                const choosenPrice = value;
+                                const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
+                                if (choosenPrice && choosenQuantity) {
+                                  const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                                  if (totalPrice < 0) return;
+                                  this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                                  // this.setState({ initialValues: {
+                                  //   [index]: Math.random() + ''
+                                  // } })
+                                }
+                              }}
+                            >  
+                              <Input type="number" 
+                                placeholder="2599"
+                                addonAfter={'PKR'}
+                                onChange={(event) => {
+                                  const choosenPrice = event.target.value;
+                                  const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
+                                  if (choosenPrice && choosenQuantity) {
+                                    const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                                    if (totalPrice < 0) return;
+                                    this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
+                                    this.setState({ initialValues: {
+                                      [index]: Math.random() + ''
+                                    } })
+                                  }
+                                }}
+                              />
+                            </AutoComplete>
+                          </Form.Item>
+                        )
+                      }}
                     </Form.Item>
                     <Form.Item
                       {...field}
@@ -509,7 +544,14 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                       labelAlign="left"
                       name={[field.name, 'quantity']}
                       style={{ width: 'auto' }}
-                      rules={[{ required: true, message: 'Please enter quantity to be sold' }]}
+                      rules={[{ validator(rule, value, callback) {
+                        try {
+                          if (!value) throw new Error('Quantity is required.');
+                          if (value < 1) throw new Error ('Quantity cannot be less than 1.');
+                        } catch (err: any) {
+                          callback(err)
+                        }
+                      }}]}
                     >
                       <AutoComplete
                         options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.quantity}`, product: product }))}
@@ -522,11 +564,13 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                           const choosenQuantity = value;
                           if (choosenPrice && choosenQuantity) {
                             const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                            if (totalPrice < 0) return;
                             this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
                           }
 
                           if (unitMeasurements && choosenQuantity) {
                             const netMeasurements = parseFloat(unitMeasurements) * parseFloat(choosenQuantity);
+                            if (netMeasurements < 0) return;
                             this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], netMeasurements);
                           }
 
@@ -542,11 +586,13 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                             const unitMeasurements = this.formRef.current?.getFieldValue(['products', index, 'unitMeasurements']);
                             if (choosenPrice && choosenQuantity) {
                               const totalPrice = parseFloat(choosenPrice) * parseFloat(choosenQuantity);
+                              if (totalPrice < 0)  return;
                               this.formRef.current?.setFieldValue(['products', index, 'totalPrice'], totalPrice);
                               
                             }
                             if (unitMeasurements && choosenQuantity) {
                               const netMeasurements = parseFloat(unitMeasurements) * parseFloat(choosenQuantity);
+                              if (netMeasurements < 0) return;
                               this.formRef.current?.setFieldValue(['products', index, 'netMeasurements'], netMeasurements);
                             }
                           }}
@@ -586,16 +632,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                       )}
                     </Form.Item>
                     
-                    <Form.Item
-                      {...field}
-                      label=" "
-                      colon={false}
-                      labelAlign="left"
-                      name={[field.name, 'id']}
-                      hidden
-                    >
-                      <Input disabled />
-                    </Form.Item>
+                    
                     <Form.Item label=" " colon={false} labelAlign="left">
                       <Popconfirm
                         title={`Are you sure to remove Product #${index+1}`}
@@ -686,9 +723,13 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                               label="Amount"
                               colon={false}
                               labelAlign="left"
-                              rules={[{ required: true, message: 'Please enter amount.' }]}
+                              rules={[
+                                { required: true, validator: (rule, value, setError) => {
+                                  if (value < 1) setError('Value cannot be less than 1');
+                                }, type: 'method',  message: 'Please enter valid amount.' },
+                              ]}
                             >
-                              <Input type="number" addonAfter="PKR" placeholder="2599" />
+                              <Input type="number" min={1} addonAfter="PKR" placeholder="2599" />
                             </Form.Item>
                             
                             <Form.Item label=" " colon={false} labelAlign="left">
