@@ -29,7 +29,7 @@ interface DashboardState {
 }
 
 export default class Dashboard extends Component<DashboardProps, DashboardState> {
-
+  private timeoutId: NodeJS.Timeout | null = null;
   constructor(props: DashboardProps) {
     super(props);
 
@@ -40,14 +40,29 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
   }
 
   componentDidMount(): void {
+    this.timeoutId = setTimeout(() => {
+      this.getSuggestions();
+    }, 1000);
+  }
+
+  getSuggestions = (retryCount = 0) => {
     const { getSuggestions } = this.props;
     this.setState({ isLoading: true });
     getSuggestions({
-      onError: () => toast.error('Failed to load suggestions. Please relaod the application and ensure internet is connected.'),
+      onError: () => {
+        this.getSuggestions(retryCount + 1);
+        if (retryCount < 5)
+          return toast.error('Failed to load suggestions. Retrying...');
+          toast.error('Failed to load suggestions. Please ensure internet is connected and reload the application.');
+      },
+      onSuccess: () => toast.info('Suggestions Loaded!'),
       onComplete: () => this.setState({ isLoading: false })
     });
   }
-
+  
+  componentWillUnmount(): void {
+    this.timeoutId && clearTimeout(this.timeoutId);
+  }
   render(): React.ReactNode {
     const { isSidebarCollapsed, isLoading } = this.state;
     const { children, navigationProps, authentication, logout } = this.props;
@@ -118,7 +133,7 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
                   event.preventDefault();
                   logout();
                   toast.info('Logged out successfully!');
-                  navigate('/');
+                  navigate(0);
                 }}>Logout</a>
               </Typography.Text><br />
               <Typography.Text style={{ color: '#ccc', fontSize: '12px' }}>

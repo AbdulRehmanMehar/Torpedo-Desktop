@@ -6,12 +6,14 @@ import { login } from './Store/Actions';
 import { Spin } from 'antd';
 import { toast } from 'react-toastify';
 import messages from '../../config/messages';
+import withNavigation, { NavigationProps } from '../../hoc/Navigation';
 
 
 const { Text, Title, Paragraph } = Typography;
 
 interface LoginProps {
   login: Function;
+  navigationProps: NavigationProps;
 }
 
 class Login extends Component<LoginProps, { isProcessing: boolean }> {
@@ -27,10 +29,15 @@ class Login extends Component<LoginProps, { isProcessing: boolean }> {
   onSubmit(values: any) {
     console.log(this.props);
     
-    const { login } = this.props;
+    const { login, navigationProps } = this.props;
+    const { navigate } = navigationProps;
     this.setState({ isProcessing: true });
     login({
       data: values,
+      onSuccess: () => {
+        toast.success('Logged In successfully.');
+        navigate(0);
+      },
       onError: (message: string) => toast.error(message),
       onComplete: () => this.setState({ isProcessing: false }),
     });
@@ -107,4 +114,4 @@ class Login extends Component<LoginProps, { isProcessing: boolean }> {
 
 export default connect(null, {
   login
-})(Login);
+})(withNavigation(Login));
