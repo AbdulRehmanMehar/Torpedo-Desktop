@@ -36,7 +36,7 @@ class Login extends Component<LoginProps, { isProcessing: boolean }> {
       data: values,
       onSuccess: () => {
         toast.success('Logged In successfully.');
-        navigate(0);
+        window.location.reload();
       },
       onError: (message: string) => toast.error(message),
       onComplete: () => this.setState({ isProcessing: false }),
