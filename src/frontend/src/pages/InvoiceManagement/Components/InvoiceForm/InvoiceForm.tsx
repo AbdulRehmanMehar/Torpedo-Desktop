@@ -299,7 +299,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
               }}
             >
                           
-              <Input  />
+              <Input placeholder="03167943024"  />
             </AutoComplete>
           </Form.Item>
 
@@ -311,7 +311,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
               }
             >
                           
-              <Input  />
+              <Input placeholder="Abdul Rehman" />
             </AutoComplete>
           </Form.Item>
 
@@ -347,6 +347,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                       rules={[{ required: true, message: 'Select Product' }]}
                     >
                       <Select
+                        placeholder="Choose a Product"
                         showSearch
                         options={(((suggestions as any) || {})['products'] || []).map((product: any) => ({ value: `${product.title}`, product: product }))}
                         filterOption={(inputValue: string, option: any) =>
@@ -485,6 +486,8 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         }}
                       >  
                         <Input type="number" 
+                          placeholder="2599"
+                          addonAfter={'PKR'}
                           onChange={(event) => {
                             const choosenPrice = event.target.value;
                             const choosenQuantity = this.formRef.current?.getFieldValue(['products', index, 'quantity']);
@@ -532,6 +535,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                                     
                         <Input 
                           type="number"
+                          placeholder="10"
                           onChange={(event) => {
                             const choosenPrice = this.formRef.current?.getFieldValue(['products', index, 'price']);
                             const choosenQuantity = event.target.value;
@@ -666,6 +670,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                               labelAlign="left"
                             >
                               <Select
+                                placeholder="Choose any of the -> Debt | Credit | Cash"
                                 showSearch
                                 options={(['Debt', 'Credit', 'Cash']).map((paymentType: any) => ({ value: `${paymentType}` }))}
                                 filterOption={(inputValue: string, option: any) =>
@@ -683,7 +688,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                               labelAlign="left"
                               rules={[{ required: true, message: 'Please enter amount.' }]}
                             >
-                              <Input type="number" />
+                              <Input type="number" addonAfter="PKR" placeholder="2599" />
                             </Form.Item>
                             
                             <Form.Item label=" " colon={false} labelAlign="left">
