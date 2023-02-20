@@ -135,9 +135,12 @@ export default class Dashboard extends Component<DashboardProps, DashboardState>
                 { authentication.user?.name } -&nbsp;
                 <a href='#' onClick={(event) => {
                   event.preventDefault();
-                  logout();
-                  toast.info('Logged out successfully!');
-                  window.location.reload();
+                  logout({
+                    onComplete: () => {
+                      toast.info('Logged out successfully!');
+                      navigate('/login');
+                    }
+                  });
                 }}>Logout</a>
               </Typography.Text><br />
               <Typography.Text style={{ color: '#ccc', fontSize: '12px' }}>

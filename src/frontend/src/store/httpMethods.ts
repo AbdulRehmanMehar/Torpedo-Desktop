@@ -2,10 +2,17 @@ import { getRequests } from "../http";
 import { getAccessToken } from "../config/localstorage";
 import { SuggestionsResponse } from "../config/types";
 
-const requests = getRequests({
-    headers: {
-        Authorization: `Bearer ${getAccessToken()}`,
-    }
-});
 
-export const fetchSuggestions = (): Promise<SuggestionsResponse> => requests.get(`/suggestions`);
+export const fetchSuggestions = (): Promise<SuggestionsResponse> => {
+    let token = getAccessToken();
+    while(!token) {
+        token = getAccessToken();
+    }
+
+    const requests = getRequests({
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+    return requests.get(`/suggestions`);
+};

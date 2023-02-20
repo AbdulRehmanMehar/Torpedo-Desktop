@@ -77,7 +77,11 @@ export default class ApplicationRouter extends Component<any, any> {
                 );
             });
           })}
-
+          <Route
+            key={'login'}
+            path={'/login'}
+            element={<></>}
+          />
         </Routes>
       </Suspense>
     );

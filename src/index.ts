@@ -17,9 +17,14 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
+  });
+  
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
   });
 
   mainWindow.webContents.on('will-navigate', function (e, url) {
@@ -40,12 +45,13 @@ const createWindow = (): void => {
 
   mainWindow.webContents.once("dom-ready", async () => {
     mainWindow.webContents.openDevTools();
-    await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-      .then((name) => console.log(`Added Extension:  ${name}`))
-      .catch((err) => console.log("An error occurred: ", err))
-      .finally(() => {
-      });
-    });
+  })
+    // await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+    //   .then((name) => console.log(`Added Extension:  ${name}`))
+    //   .catch((err) => console.log("An error occurred: ", err))
+    //   .finally(() => {
+    //   });
+    // });
 };
 
 // This method will be called when Electron has finished

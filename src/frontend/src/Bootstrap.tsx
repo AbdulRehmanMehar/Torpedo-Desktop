@@ -5,9 +5,15 @@ import store, { RootState } from "./store";
 import Login from "./pages/Authentication/Login";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import withNavigation, { NavigationProps } from "./hoc/Navigation";
 
 
-class Bootstrap extends Component<{ token: string | undefined }, any> {
+class Bootstrap extends Component<{ token: string | undefined; navigationProps: NavigationProps }, any> {
+    componentDidMount(): void {
+        const { navigationProps, token } = this.props;
+        const { navigate } = navigationProps;
+        if (!token) navigate('/login');
+    }
     render() {
         const { token } = this.props;
         return (
@@ -34,4 +40,4 @@ const mapStateToProps = (state: RootState) => {
     };
   };
   
-  export default connect(mapStateToProps, {})(Bootstrap);
+  export default connect(mapStateToProps, {})(withNavigation(Bootstrap));
