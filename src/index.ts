@@ -22,6 +22,11 @@ const createWindow = (): void => {
     },
   });
 
+  mainWindow.webContents.on('will-navigate', function (e, url) {
+    e.preventDefault();
+    shell.openExternal(url);
+  });
+
   // and load the index.html of the app.
   if (app.isPackaged) {
     const pathOfBuild = path.join(__dirname, './build/index.html');
@@ -41,11 +46,6 @@ const createWindow = (): void => {
       .finally(() => {
       });
     });
-
-  mainWindow.webContents.on('will-navigate', function (e, url) {
-    e.preventDefault();
-    shell.openExternal(url);
-  });
 };
 
 // This method will be called when Electron has finished

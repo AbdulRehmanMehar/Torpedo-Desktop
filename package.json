@@ -49,6 +49,17 @@
       ]
     }
   },
+  "build": {
+    "appId": "com.abdurehman.torpedo",
+    "files": [
+      "!**/**",
+      "node_modules/**",
+      "build/**"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/node": "^18.8.3",
