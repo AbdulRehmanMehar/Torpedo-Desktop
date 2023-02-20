@@ -50,14 +50,20 @@
     }
   },
   "build": {
+    "productName": "Torpedo",
     "appId": "com.abdurehman.torpedo",
     "files": [
       "!**/**",
       "node_modules/**",
-      "build/**"
+      "build/**",
+      "resources/**/*"
     ],
     "win": {
       "target": "portable"
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
     }
   },
   "devDependencies": {
