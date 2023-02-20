@@ -279,8 +279,6 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
     const { suggestions, formProps } = this.props;
 
-    const products = this.convertProductsToArray();
-    console.log({ formProps });
 
     return (
       <Layout style={{ height: '100% !important', overflowY: 'auto' }}>
@@ -333,7 +331,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
             {(fields, { add, remove }, { errors }) => (
               <>
                 {fields.map(({ key, ...field }, index) => (
-                  <>
+                  <Fragment key={'formProducts'+index}>
                     <p style={{ textAlign: 'center' }}>
                       <b style={{ marginLeft: '150px' }}>Product #{(index + 1)}</b>
                     </p> 
@@ -654,7 +652,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                         Remove Product #{(index + 1)}
                       </Button>
                     </Form.Item> */}
-                  </>
+                  </Fragment >
                 ))}
 
 
@@ -676,15 +674,37 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                     name="payments"
                     rules={[
                       {
-                        validator: async (_, payments) => {
-                          if (!payments || !payments.length) {
-                            return Promise.reject(new Error('Please add at least 1 payment.'));
-                          }
-                          const paymentTypes = payments.map((payment: any) => (payment || {}).paymentType).filter((paymentType: string) => !!paymentType);
-                          if (!paymentTypes.length) return Promise.reject(new Error('Please add payment(s) information.'));
-                          const uniquePaymentTypes = [...new Set(paymentTypes)];
-                          if (paymentTypes.length !== uniquePaymentTypes.length) {
-                            return Promise.reject(new Error('Duplicate Found! Please ensure that no payment type is added twice.'));
+                        validator: (_, payments, callback) => {
+                          try {
+                            const products = this.formRef.current?.getFieldValue('products');
+
+                            const totalPriceFromProductsArray = products.map((product: any) => product.totalPrice).filter((price: any) => !!price).map((price: any) => parseFloat(price));
+                            if (products.length !== totalPriceFromProductsArray.length) {
+                              throw (new Error('Please fill in the product data before adding payment information'));
+                            }
+
+                            if (!payments || !payments.length) {
+                              throw (new Error('Please add at least 1 payment.'));
+                            }
+                            const paymentTypes = payments.map((payment: any) => (payment || {}).paymentType).filter((paymentType: string) => !!paymentType);
+                            if (!paymentTypes.length) throw (new Error('Please add payment(s) information.'));                        
+
+                            const uniquePaymentTypes = [...new Set(paymentTypes)];
+                            if (paymentTypes.length !== uniquePaymentTypes.length) {
+                              throw (new Error('Duplicate Found! Please ensure that no payment type is added twice.'));
+                            }
+
+                            const totalAmountFromPaymentsArray = payments.filter((payment:any) => !!payment && !!(payment || {}).amount).map((payment: any) => payment.amount).filter((amount: any) => !!amount).map((amount: any) => parseFloat(amount));
+                            const totalAmount = (totalAmountFromPaymentsArray || []).reduce((prev: number, current: number) => prev + current, 0);
+                            const totalPrice = (totalPriceFromProductsArray || []).reduce((prev: number, current: number) => prev + current, 0);
+                            if (totalAmount > totalPrice) {
+                              throw (new Error('The total amount recieved is greater than payable amount.'));
+                            }
+                            if (totalAmount < totalPrice) {
+                              throw (new Error('The total amount recieved is less than payable amount.'));
+                            }
+                          } catch (err: any) {
+                            callback(err);
                           }
                         },
                       },
@@ -693,13 +713,13 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                     {(fields, { add, remove }, { errors }) => (
                       <>
                         {fields.map((field, index) => (
-                          <>
+                          <Fragment key={'formPayment'+index}>
                             <p style={{ textAlign: 'center' }}>
                               <b style={{ marginLeft: '150px' }}>Payment #{(index + 1)}</b>
                             </p> 
                             
                             <Form.Item
-                              {...field}
+                              
                               required={true}
                               name={[field.name, 'paymentType']}
                               label="Payment Type"
@@ -718,15 +738,20 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
                             </Form.Item>
 
                             <Form.Item
-                              {...field}
+                              
                               name={[field.name, 'amount']}
                               label="Amount"
                               colon={false}
                               labelAlign="left"
                               rules={[
-                                { required: true, validator: (rule, value, setError) => {
-                                  if (value < 1) setError('Value cannot be less than 1');
-                                }, type: 'method',  message: 'Please enter valid amount.' },
+                                { validator: (rule, value, callback) => {
+                                  try {
+                                    if (!value) throw new Error('Amount is required.');
+                                    if (value < 1) throw new Error('Amount cannot be less than 1.');
+                                  } catch (err: any) {
+                                    callback(err);
+                                  }
+                                }, },
                               ]}
                             >
                               <Input type="number" min={1} addonAfter="PKR" placeholder="2599" />
@@ -751,7 +776,7 @@ export default class InvoiceForm extends Component<InvoiceFormProps, InvoiceForm
 
                             </Form.Item>
                             
-                          </>
+                          </Fragment>
                         ))}
                         <Form.Item label="Add Payment(s)" labelAlign="left" colon={false}>
                           <Button
