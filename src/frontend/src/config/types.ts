@@ -14,12 +14,14 @@ interface ProductAsInvoiceItem {
   id: string;
   price: number;
   quantity: number;
+  defaultProductPrice?: number;
 }
 
 interface InvoiceInterface {
   id: string;
   customer: CustomerInterface;
   products: ProductAsInvoiceItem[];
+  invoiceItems: Array<ProductAsInvoiceItem & {product: ProductResponse}>;
   payments: Payment[];
   netPayable?: number;
 }

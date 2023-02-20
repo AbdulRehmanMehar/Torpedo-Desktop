@@ -182,7 +182,7 @@ export default class Product extends Component<ProductProps, ProductState> {
           dataSource={(products || []).map(
             ({ id, brand, name, price, quantity, quality, height, width, type }, index) => ({
               key: id,
-              id: (index + 1),
+              id: (((pageNumber || 1) - 1) * 10) + (index + 1),
               brand,
               name,
               price,

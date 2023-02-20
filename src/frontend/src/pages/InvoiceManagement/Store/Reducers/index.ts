@@ -6,6 +6,8 @@ interface State {
   totalInvoices: number;
 }
 
+export type InoviceStore = State;
+
 const initalState: State = {
   invoices: [],
   totalInvoices: 0,

@@ -8,7 +8,7 @@ export const getInvoices = (args: ActionArgs) => async (dispatch: Dispatch) => {
   const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
-    const { invoices, total } = await getInvoiceList();
+    const { invoices, total } = await getInvoiceList(data);
     
     dispatch({
       type: ActionTypes.GET_INVOICES,

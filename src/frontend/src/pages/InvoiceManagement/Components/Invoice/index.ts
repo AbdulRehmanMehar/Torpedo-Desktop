@@ -1,13 +1,15 @@
 import { connect } from "react-redux";
+import withNavigation from "../../../../hoc/Navigation";
 import { RootState } from "../../../../store";
 import { getInvoices } from "../../Store/Actions";
 import Invoice from "./Invoice";
 
 const mapStateToProps = (state: RootState) => {
   const { Invoice } = state;
-  const { invoices } = Invoice;
+  const { invoices, totalInvoices } = Invoice;
   return {
-    invoices
+    invoices,
+    totalInvoices
   };
 };
 
@@ -15,4 +17,4 @@ const mapActionToProps = {
   getInvoices
 };
 
-export default connect(mapStateToProps, mapActionToProps)(Invoice);
+export default connect(mapStateToProps, mapActionToProps)(withNavigation(Invoice));
