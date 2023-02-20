@@ -10,7 +10,7 @@ const requests = getRequests({
 });
 
 
-export const getInvoiceList = (): Promise<InvoiceListResponse> => requests.get('/invoices');
+export const getInvoiceList = (): Promise<{ total: number, invoices: InvoiceListResponse }> => requests.get('/invoices');
 export const createInvoice = (invoice: Invoice): Promise<CreateInvoiceResponse> => requests.post('/invoices/add', { 
     customer: {
         name: invoice.customer.name,

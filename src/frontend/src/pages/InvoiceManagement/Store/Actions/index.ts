@@ -8,11 +8,14 @@ export const getInvoices = (args: ActionArgs) => async (dispatch: Dispatch) => {
   const { data, onSuccess, onComplete, onError } = args || {};
 
   try {
-    const { invoices } = await getInvoiceList();
+    const { invoices, total } = await getInvoiceList();
     
     dispatch({
       type: ActionTypes.GET_INVOICES,
-      payload: invoices
+      payload: {
+        invoices, 
+        total
+      }
     });
 
     onSuccess && onSuccess(invoices);
@@ -36,6 +39,11 @@ export const addInvoice = (args: ActionArgs) =>async (dispatch: Dispatch) => {
     const { invoice } = await createInvoice(data);
     console.log({ invoice });
     
+    dispatch({
+      type: ActionTypes.ADD_INVOICE,
+      payload: invoice
+    });
+
     onSuccess && onSuccess();
   } catch (error) {
     console.log(error);
