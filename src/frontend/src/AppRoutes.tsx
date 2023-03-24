@@ -3,20 +3,44 @@ import { Component, lazy, ReactNode, Suspense } from 'react';
 import {
   DesktopOutlined,
   UnorderedListOutlined,
-  PlusSquareOutlined
+  PlusSquareOutlined,
+  DeploymentUnitOutlined
 } from '@ant-design/icons';
 
 const InvoiceList = lazy(() => import('./pages/InvoiceManagement/Components/Invoice'));
 const InvoiceForm = lazy(() => import('./pages/InvoiceManagement/Components/InvoiceForm'));
 
+const ProductList = lazy(() => import('./pages/ProductManagement/Components/Products'));
+const ProductForm = lazy(() => import('./pages/ProductManagement/Components/ProductForm'));
+
 export const menu: Record<any, any> = {
+  ProductManagement: {
+    label: 'Product Management',
+    icon: <DeploymentUnitOutlined />,
+    children: [
+      {
+        key: 'list-products',
+        path: '/',
+        label: 'Products',
+        icon: <UnorderedListOutlined />,
+        component: ProductList,
+      },
+      {
+        key: 'create-update-product',
+        path: '/create-update-product/:productId',
+        label: 'Create Product',
+        icon: <PlusSquareOutlined />,
+        component: ProductForm,
+      },
+    ]
+  },
   InvoiceManagement: {
     label: 'Invoice Management',
     icon: <DesktopOutlined />,
     children: [
       {
         key: 'list-invoices',
-        path: '/',
+        path: '/list-invoices',
         label: 'Invoices',
         icon: <UnorderedListOutlined />,
         component: InvoiceList,
@@ -53,7 +77,11 @@ export default class ApplicationRouter extends Component<any, any> {
                 );
             });
           })}
-
+          <Route
+            key={'login'}
+            path={'/login'}
+            element={<></>}
+          />
         </Routes>
       </Suspense>
     );

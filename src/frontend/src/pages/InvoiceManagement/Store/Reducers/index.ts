@@ -3,10 +3,14 @@ import { Action, ActionTypes } from "../Actions/types";
 
 interface State {
   invoices: Invoice[];
+  totalInvoices: number;
 }
+
+export type InoviceStore = State;
 
 const initalState: State = {
   invoices: [],
+  totalInvoices: 0,
 };
 
 const invoiceReducer = (state = initalState, action: Action) => {
@@ -15,7 +19,15 @@ const invoiceReducer = (state = initalState, action: Action) => {
     case ActionTypes.GET_INVOICES:      
       return {
         ...state,
-        invoices: action.payload
+        invoices: action.payload.invoices,
+        totalInvoices: action.payload.total,
+      };
+
+    case ActionTypes.ADD_INVOICE:      
+      return {
+        ...state,
+        invoices: [...state.invoices, action.payload],
+        totalInvoices: state.totalInvoices + 1
       };
     
     default: 

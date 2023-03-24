@@ -2,7 +2,7 @@
 const path = require('path');
 const copydir = require('copy-dir');
  
-copydir.sync('./src/frontend/build', './dist/build', {
+copydir.sync('./src/frontend/build', './build/build', {
   filter: function(stat, filepath, filename){
     // do not want copy .html files
     // if(stat === 'file' && path.extname(filepath) === '.html') {

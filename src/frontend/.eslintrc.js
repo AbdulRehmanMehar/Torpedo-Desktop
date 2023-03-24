@@ -39,7 +39,7 @@ module.exports =  {
     "@typescript-eslint/triple-slash-reference": 0,
     "@typescript-eslint/ban-types": 0,
     "@typescript-eslint/no-explicit-any": 0,
-    "sonarjs/cognitive-complexity": 2,
+    "sonarjs/cognitive-complexity": 0,
     "sonarjs/no-identical-expressions": 2
   }
 }

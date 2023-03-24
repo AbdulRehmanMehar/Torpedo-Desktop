@@ -1,5 +1,5 @@
 import * as dotEnv from 'dotenv';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import * as path from 'path';
 import installExtension, { REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
@@ -17,9 +17,20 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    show: false,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
+  });
+  
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  mainWindow.webContents.on('will-navigate', function (e, url) {
+    e.preventDefault();
+    shell.openExternal(url);
   });
 
   // and load the index.html of the app.
@@ -34,13 +45,14 @@ const createWindow = (): void => {
   mainWindow.loadURL('http://localhost:1133');
 
   mainWindow.webContents.once("dom-ready", async () => {
-    await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-      .then((name) => console.log(`Added Extension:  ${name}`))
-      .catch((err) => console.log("An error occurred: ", err))
-      .finally(() => {
-          mainWindow.webContents.openDevTools();
-      });
-    });
+    mainWindow.webContents.openDevTools();
+  })
+    // await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+    //   .then((name) => console.log(`Added Extension:  ${name}`))
+    //   .catch((err) => console.log("An error occurred: ", err))
+    //   .finally(() => {
+    //   });
+    // });
 };
 
 // This method will be called when Electron has finished
